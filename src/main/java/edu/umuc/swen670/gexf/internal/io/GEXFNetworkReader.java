@@ -66,25 +66,7 @@ public class GEXFNetworkReader extends AbstractCyNetworkReader  {
 		GEXFParser gexfParser = new GEXFParser();
 		gexfParser.ParseStream(_inputStream, _cyNetwork);
 		
-		/*
-		CyNode cyNode1 = _cyNetwork.addNode();
-		//_cyNetwork.getDefaultNetworkTable().getRow(cyNode1.getSUID()).set(CyNetwork.NAME, "Hello world 1");
-		_cyNetwork.getRow(cyNode1).set(CyNetwork.NAME, "my node 1");
-		
-		CyNode cyNode2 = _cyNetwork.addNode();
-		//_cyNetwork.getDefaultNetworkTable().getRow(cyNode2.getSUID()).set(CyNetwork.NAME, "Hello world 2");
-		_cyNetwork.getRow(cyNode2).set(CyNetwork.NAME, "my node 2");
-		
-		_cyNetwork.addEdge(cyNode1, cyNode2, true);
-		
-		//if(!_cyNetworkManager.networkExists(_cyNetwork.getSUID())) {
-		//	_cyNetworkManager.addNetwork(_cyNetwork);
-		//}
-		*/
 
-		
-		
-		
 		monitor.setStatusMessage("Add network");
 		//Thread.sleep(1000);
 		monitor.setProgress(1.00);
