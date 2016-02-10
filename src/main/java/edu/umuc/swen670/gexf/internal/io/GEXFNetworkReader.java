@@ -15,6 +15,8 @@ import org.cytoscape.work.TaskMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.umuc.swen670.gexf.internal.model.GEXFParser;
+
 public class GEXFNetworkReader extends AbstractCyNetworkReader  {
 
 	private final InputStream _inputStream;
@@ -58,9 +60,13 @@ public class GEXFNetworkReader extends AbstractCyNetworkReader  {
 		_cyNetwork = _cyNetworkFactory.createNetwork();
 		
 		monitor.setStatusMessage("Create nodes");
-		Thread.sleep(1000);
+		//Thread.sleep(1000);
 		monitor.setProgress(0.50);
 		
+		GEXFParser gexfParser = new GEXFParser();
+		gexfParser.ParseStream(_inputStream, _cyNetwork);
+		
+		/*
 		CyNode cyNode1 = _cyNetwork.addNode();
 		//_cyNetwork.getDefaultNetworkTable().getRow(cyNode1.getSUID()).set(CyNetwork.NAME, "Hello world 1");
 		_cyNetwork.getRow(cyNode1).set(CyNetwork.NAME, "my node 1");
@@ -74,12 +80,13 @@ public class GEXFNetworkReader extends AbstractCyNetworkReader  {
 		//if(!_cyNetworkManager.networkExists(_cyNetwork.getSUID())) {
 		//	_cyNetworkManager.addNetwork(_cyNetwork);
 		//}
+		*/
 
 		
 		
 		
 		monitor.setStatusMessage("Add network");
-		Thread.sleep(1000);
+		//Thread.sleep(1000);
 		monitor.setProgress(1.00);
 		
 		this.networks = new CyNetwork[1];
