@@ -84,10 +84,12 @@ public class GEXF12Parser {
             	  for(int j=0; j< childNodes.getLength(); j++) {
             		  Node childNode = childNodes.item(j);
             		  if(childNode.getNodeName().equalsIgnoreCase("default")) {
-            			  xDefault = childNode.getNodeValue().trim();
+//            			  xDefault = childNode.getNodeValue().trim();
             		  }
             	  }
               }
+              
+              _logger.debug("Attempt to  create column: " + xId + " , " + xTitle + " , " + xType);
               
               if(xDefault == null || xDefault.length() == 0) {
             	  cyTable.createColumn(xTitle, GetClass(xType), false);
@@ -135,22 +137,24 @@ public class GEXF12Parser {
             	 String xFor = xElem.getAttribute("for");
             	 String xValue = xElem.getAttribute("value");
             	 
-            	 if(attMapping.Type.get(xFor) == "integer") {
+            	 String type = attMapping.Type.get(xFor);
+            	 if(type.equalsIgnoreCase("integer")) {
             		 cyNetwork.getRow(cyNode).set(attMapping.Id.get(xFor), Integer.parseInt(xValue));
             	 }
-            	 else if(attMapping.Type.get(xFor) == "double") {
+            	 else if(type.equalsIgnoreCase("double")) {
             		 cyNetwork.getRow(cyNode).set(attMapping.Id.get(xFor), Double.parseDouble(xValue));
             	 }
-            	 else if(attMapping.Type.get(xFor) == "float") {
-            		 cyNetwork.getRow(cyNode).set(attMapping.Id.get(xFor), Float.parseFloat(xValue));
+            	 else if(type.equalsIgnoreCase("float")) {
+            		 //float not supported
+            		 cyNetwork.getRow(cyNode).set(attMapping.Id.get(xFor), Double.parseDouble(xValue));
             	 }
-            	 else if(attMapping.Type.get(xFor) == "boolean") {
+            	 else if(type.equalsIgnoreCase("boolean")) {
             		 cyNetwork.getRow(cyNode).set(attMapping.Id.get(xFor), Boolean.parseBoolean(xValue));
             	 }
-            	 else if(attMapping.Type.get(xFor) == "string") {
+            	 else if(type.equalsIgnoreCase("string")) {
             		 cyNetwork.getRow(cyNode).set(attMapping.Id.get(xFor), xValue);
             	 }
-            	 else if(attMapping.Type.get(xFor) == "liststring") {
+            	 else if(type.equalsIgnoreCase("liststring")) {
             		//TODO liststring is crazy and will require special processing to handle
          			throw new InvalidClassException("liststring");
             	 }
@@ -186,7 +190,8 @@ public class GEXF12Parser {
 			return Double.class;
 		}
 		else if(type.equalsIgnoreCase("float")) {
-			return Float.class;
+			//float not supported
+			return Double.class;
 		}
 		else if(type.equalsIgnoreCase("boolean")) {
 			return Boolean.class;
