@@ -84,18 +84,30 @@ public class GEXF12Parser {
             	  for(int j=0; j< childNodes.getLength(); j++) {
             		  Node childNode = childNodes.item(j);
             		  if(childNode.getNodeName().equalsIgnoreCase("default")) {
-//            			  xDefault = childNode.getNodeValue().trim();
+            			  xDefault = childNode.getTextContent().trim();
             		  }
             	  }
               }
-              
-              _logger.debug("Attempt to  create column: " + xId + " , " + xTitle + " , " + xType);
               
               if(xDefault == null || xDefault.length() == 0) {
             	  cyTable.createColumn(xTitle, GetClass(xType), false);
               }
               else {
-            	  cyTable.createColumn(xTitle, GetClass(xType), false, xDefault);
+            	  if(xType.equalsIgnoreCase("integer")) {
+            		  cyTable.createColumn(xTitle, GetClass(xType), false, Integer.parseInt(xDefault));
+            	  } else if(xType.equalsIgnoreCase("double")) {
+            		  cyTable.createColumn(xTitle, GetClass(xType), false, Double.parseDouble(xDefault));
+            	  } else if(xType.equalsIgnoreCase("float")) {
+            		  //float not supported
+            		  cyTable.createColumn(xTitle, GetClass(xType), false, Double.parseDouble(xDefault));
+            	  } else if(xType.equalsIgnoreCase("boolean")) {
+            		  cyTable.createColumn(xTitle, GetClass(xType), false, Boolean.parseBoolean(xDefault));
+            	  } else if(xType.equalsIgnoreCase("string")) {
+            		  cyTable.createColumn(xTitle, GetClass(xType), false, xDefault);
+            	  } else if(xType.equalsIgnoreCase("liststring")) {
+            		  //TODO liststring is crazy and will require special processing to handle
+           				throw new InvalidClassException("liststring");
+            	  }
               }
               
               attMapping.Id.put(xId, xTitle);
