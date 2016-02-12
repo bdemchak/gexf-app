@@ -13,11 +13,11 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.cytoscape.model.CyEdge;
+import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyTable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -27,8 +27,6 @@ import org.xml.sax.SAXException;
 import edu.umuc.swen670.gexf.internal.io.GEXFFileFilter;
 
 public class GEXF12Parser {
-
-	private static final Logger _logger = LoggerFactory.getLogger(GEXF12Parser.class);
 
 	public void ParseStream(InputStream inputStream, CyNetwork cyNetwork) throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
 
@@ -43,8 +41,11 @@ public class GEXF12Parser {
 
 		doc.getDocumentElement().normalize();
 
-		AttributeMapping attMapping;
-		attMapping = ParseNodeAttributesHeader(doc, cyNetwork);
+		AttributeMapping attNodeMapping;
+		attNodeMapping = ParseAttributeHeader("node", doc, cyNetwork);
+		
+		AttributeMapping attEdgeMapping;
+		attEdgeMapping = ParseAttributeHeader("edge", doc, cyNetwork);
 
 
 		XPath xPath =  XPathFactory.newInstance().newXPath();
@@ -54,19 +55,27 @@ public class GEXF12Parser {
 		for (int i = 0; i < nodeList.getLength(); i++) {
 			Node xNode = nodeList.item(i);
 
-			ParseNode(xNode, cyNetwork, idMapping, attMapping, doc, expression);
+			ParseNode(xNode, cyNetwork, idMapping, attNodeMapping, doc, expression);
 		}
 
-		ParseEdges(doc, cyNetwork, idMapping);
+		ParseEdges(doc, cyNetwork, idMapping, attEdgeMapping);
 	}
 
-	private AttributeMapping ParseNodeAttributesHeader(Document doc, CyNetwork cyNetwork) throws XPathExpressionException, InvalidClassException {
+	private AttributeMapping ParseAttributeHeader(String attributeClass, Document doc, CyNetwork cyNetwork) throws XPathExpressionException, InvalidClassException {
 		AttributeMapping attMapping = new AttributeMapping();
 
-		CyTable cyTable = cyNetwork.getDefaultNodeTable();
+		CyTable cyTable;
+		if(attributeClass.equalsIgnoreCase("node")) {
+			cyTable = cyNetwork.getDefaultNodeTable();
+		} else if(attributeClass.equalsIgnoreCase("edge")) {
+			cyTable = cyNetwork.getDefaultEdgeTable();
+		} else {
+			throw new InvalidClassException(attributeClass);
+		}
+		
 
 		XPath xPath =  XPathFactory.newInstance().newXPath();
-		String expression = "/gexf/graph/attributes[@class='node']/attribute";
+		String expression = "/gexf/graph/attributes[@class='" + attributeClass +"']/attribute";
 		NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
 		for (int i = 0; i < nodeList.getLength(); i++) {
 			Node xNode = nodeList.item(i);
@@ -133,12 +142,12 @@ public class GEXF12Parser {
 			if(xNode.hasChildNodes()) {
 				String attExpression = expression + "[@id='" + xId + "']/attvalues/attvalue";
 
-				ParseNodeAttributes(cyNode, cyNetwork, attMapping, doc, attExpression);
+				ParseAttributes(cyNode, cyNetwork, attMapping, doc, attExpression);
 			}
 		}
 	}
 
-	private void ParseNodeAttributes(CyNode cyNode, CyNetwork cyNetwork, AttributeMapping attMapping, Document doc, String expression) throws XPathExpressionException, InvalidClassException {
+	private void ParseAttributes(CyIdentifiable cyIdentifiable, CyNetwork cyNetwork, AttributeMapping attMapping, Document doc, String expression) throws XPathExpressionException, InvalidClassException {
 		XPath xPath =  XPathFactory.newInstance().newXPath();
 		NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
 
@@ -151,20 +160,20 @@ public class GEXF12Parser {
 
 				String type = attMapping.Type.get(xFor);
 				if(type.equalsIgnoreCase("integer")) {
-					cyNetwork.getRow(cyNode).set(attMapping.Id.get(xFor), Integer.parseInt(xValue));
+					cyNetwork.getRow(cyIdentifiable).set(attMapping.Id.get(xFor), Integer.parseInt(xValue));
 				}
 				else if(type.equalsIgnoreCase("double")) {
-					cyNetwork.getRow(cyNode).set(attMapping.Id.get(xFor), Double.parseDouble(xValue));
+					cyNetwork.getRow(cyIdentifiable).set(attMapping.Id.get(xFor), Double.parseDouble(xValue));
 				}
 				else if(type.equalsIgnoreCase("float")) {
 					//float not supported
-					cyNetwork.getRow(cyNode).set(attMapping.Id.get(xFor), Double.parseDouble(xValue));
+					cyNetwork.getRow(cyIdentifiable).set(attMapping.Id.get(xFor), Double.parseDouble(xValue));
 				}
 				else if(type.equalsIgnoreCase("boolean")) {
-					cyNetwork.getRow(cyNode).set(attMapping.Id.get(xFor), Boolean.parseBoolean(xValue));
+					cyNetwork.getRow(cyIdentifiable).set(attMapping.Id.get(xFor), Boolean.parseBoolean(xValue));
 				}
 				else if(type.equalsIgnoreCase("string")) {
-					cyNetwork.getRow(cyNode).set(attMapping.Id.get(xFor), xValue);
+					cyNetwork.getRow(cyIdentifiable).set(attMapping.Id.get(xFor), xValue);
 				}
 				else if(type.equalsIgnoreCase("liststring")) {
 					//TODO liststring is crazy and will require special processing to handle
@@ -174,7 +183,7 @@ public class GEXF12Parser {
 		}
 	}
 
-	private void ParseEdges(Document doc, CyNetwork cyNetwork, Hashtable<String, Long> idMapping) throws XPathExpressionException {
+	private void ParseEdges(Document doc, CyNetwork cyNetwork, Hashtable<String, Long> idMapping, AttributeMapping attMapping) throws XPathExpressionException, InvalidClassException {
 		XPath xPath =  XPathFactory.newInstance().newXPath();
 		String expression = "/gexf/graph/edges/edge";
 		NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
@@ -189,7 +198,13 @@ public class GEXF12Parser {
 				String xId = xElem.getAttribute("id").trim();
 
 				//TODO get the graph type instead of assuming that the graph is directed
-				cyNetwork.addEdge(cyNetwork.getNode(idMapping.get(xSource)), cyNetwork.getNode(idMapping.get(xTarget)), true);
+				CyEdge cyEdge = cyNetwork.addEdge(cyNetwork.getNode(idMapping.get(xSource)), cyNetwork.getNode(idMapping.get(xTarget)), true);
+				
+				if(xNode.hasChildNodes()) {
+					String attExpression = expression + "[@id='" + xId + "']/attvalues/attvalue";
+					
+					ParseAttributes(cyEdge, cyNetwork, attMapping, doc, attExpression);
+				}
 			}
 		}
 	}
