@@ -11,7 +11,7 @@ import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.work.TaskIterator;
 
 public class GEXFNetworkReaderFactory implements InputStreamTaskFactory {
-	
+
 	private final CyFileFilter _cyFileFilter;
 	private final CyNetworkViewFactory _cyNetworkViewFactory;
 	private final CyNetworkFactory _cyNetworkFactory;
@@ -27,8 +27,8 @@ public class GEXFNetworkReaderFactory implements InputStreamTaskFactory {
 		_cyNetworkManager = cyNetworkManager;
 		_cyRootNetworkManager = cyRootNetworkManager;
 	}
-	
-	
+
+
 	@Override
 	public CyFileFilter getFileFilter() {
 		return _cyFileFilter;

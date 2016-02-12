@@ -21,22 +21,22 @@ public class CyActivator extends AbstractCyActivator {
 
 	@Override
 	public void start(BundleContext context) throws Exception {
-		
+
 		final StreamUtil streamUtil = getService(context, StreamUtil.class);
 		final CyApplicationManager cyApplicationManager = getService(context, CyApplicationManager.class);
 		final CyNetworkViewFactory cyNetworkViewFactory = getService(context, CyNetworkViewFactory.class);
 		final CyNetworkFactory cyNetworkFactory = getService(context, CyNetworkFactory.class);
 		final CyNetworkManager cyNetworkManager = getService(context, CyNetworkManager.class);
 		final CyRootNetworkManager cyRootNetworkManager = getService(context, CyRootNetworkManager.class);
-		
+
 		//register reader
 		final CyFileFilter gexfFileFilter = new GEXFFileFilter(streamUtil);
 		final GEXFNetworkReaderFactory gexfNetworkReaderFactory = new GEXFNetworkReaderFactory(gexfFileFilter, cyNetworkViewFactory, cyNetworkFactory, cyNetworkManager, cyRootNetworkManager);
 		final Properties gexfNetworkReaderFactoryProperties = new Properties();
 		gexfNetworkReaderFactoryProperties.put(ServiceProperties.ID, "GEXFNetworkReaderFactory");
 		registerService(context, gexfNetworkReaderFactory, InputStreamTaskFactory.class, gexfNetworkReaderFactoryProperties);
-		
-		
+
+
 		//register menu
 		MenuAction action = new MenuAction(cyApplicationManager, "Hello World App");
 		Properties properties = new Properties();

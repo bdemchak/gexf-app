@@ -14,9 +14,9 @@ public class GEXFParser {
 
 	public void ParseStream(InputStream inputStream, CyNetwork cyNetwork) throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
 		//TODO Check the GEXF file version as use the appropriate parser
-		
+
 		GEXF12Parser parser = new GEXF12Parser();
-		
+
 		parser.ParseStream(inputStream, cyNetwork);
 	}
 }

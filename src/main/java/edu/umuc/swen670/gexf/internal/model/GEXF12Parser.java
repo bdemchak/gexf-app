@@ -27,173 +27,173 @@ import org.xml.sax.SAXException;
 import edu.umuc.swen670.gexf.internal.io.GEXFFileFilter;
 
 public class GEXF12Parser {
-	
+
 	private static final Logger _logger = LoggerFactory.getLogger(GEXF12Parser.class);
-	
+
 	public void ParseStream(InputStream inputStream, CyNetwork cyNetwork) throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
 
 		Hashtable<String, Long> idMapping = new Hashtable<String, Long>();
-		
+
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder;
 
 		dBuilder = dbFactory.newDocumentBuilder();
-		
+
 		Document doc = dBuilder.parse(inputStream);
-		
+
 		doc.getDocumentElement().normalize();
-		
+
 		AttributeMapping attMapping;
 		attMapping = ParseNodeAttributesHeader(doc, cyNetwork);
-		
 
-         XPath xPath =  XPathFactory.newInstance().newXPath();
 
-         String expression = "/gexf/graph/nodes/node";
-         NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
-         for (int i = 0; i < nodeList.getLength(); i++) {
-            Node xNode = nodeList.item(i);
-            
-            ParseNode(xNode, cyNetwork, idMapping, attMapping, doc, expression);
-         }
-         
-         ParseEdges(doc, cyNetwork, idMapping);
+		XPath xPath =  XPathFactory.newInstance().newXPath();
+
+		String expression = "/gexf/graph/nodes/node";
+		NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
+		for (int i = 0; i < nodeList.getLength(); i++) {
+			Node xNode = nodeList.item(i);
+
+			ParseNode(xNode, cyNetwork, idMapping, attMapping, doc, expression);
+		}
+
+		ParseEdges(doc, cyNetwork, idMapping);
 	}
-	
+
 	private AttributeMapping ParseNodeAttributesHeader(Document doc, CyNetwork cyNetwork) throws XPathExpressionException, InvalidClassException {
 		AttributeMapping attMapping = new AttributeMapping();
-		
+
 		CyTable cyTable = cyNetwork.getDefaultNodeTable();
-		
+
 		XPath xPath =  XPathFactory.newInstance().newXPath();
 		String expression = "/gexf/graph/attributes[@class='node']/attribute";
-        NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
-        for (int i = 0; i < nodeList.getLength(); i++) {
-           Node xNode = nodeList.item(i);
-           
-           if (xNode.getNodeType() == Node.ELEMENT_NODE) {
-              Element xElem = (Element) xNode;
-           	
-              String xId = xElem.getAttribute("id");
-              String xTitle = xElem.getAttribute("title");
-              String xType = xElem.getAttribute("type");
-              String xDefault = null;
-              
-              if(xNode.hasChildNodes()) {
-            	  NodeList childNodes = xNode.getChildNodes();
-            	  for(int j=0; j< childNodes.getLength(); j++) {
-            		  Node childNode = childNodes.item(j);
-            		  if(childNode.getNodeName().equalsIgnoreCase("default")) {
-            			  xDefault = childNode.getTextContent().trim();
-            		  }
-            	  }
-              }
-              
-              if(xDefault == null || xDefault.length() == 0) {
-            	  cyTable.createColumn(xTitle, GetClass(xType), false);
-              }
-              else {
-            	  if(xType.equalsIgnoreCase("integer")) {
-            		  cyTable.createColumn(xTitle, GetClass(xType), false, Integer.parseInt(xDefault));
-            	  } else if(xType.equalsIgnoreCase("double")) {
-            		  cyTable.createColumn(xTitle, GetClass(xType), false, Double.parseDouble(xDefault));
-            	  } else if(xType.equalsIgnoreCase("float")) {
-            		  //float not supported
-            		  cyTable.createColumn(xTitle, GetClass(xType), false, Double.parseDouble(xDefault));
-            	  } else if(xType.equalsIgnoreCase("boolean")) {
-            		  cyTable.createColumn(xTitle, GetClass(xType), false, Boolean.parseBoolean(xDefault));
-            	  } else if(xType.equalsIgnoreCase("string")) {
-            		  cyTable.createColumn(xTitle, GetClass(xType), false, xDefault);
-            	  } else if(xType.equalsIgnoreCase("liststring")) {
-            		  //TODO liststring is crazy and will require special processing to handle
-           				throw new InvalidClassException("liststring");
-            	  }
-              }
-              
-              attMapping.Id.put(xId, xTitle);
-              attMapping.Type.put(xId, xType);
-           }
-        }
-        
-        return attMapping;
+		NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
+		for (int i = 0; i < nodeList.getLength(); i++) {
+			Node xNode = nodeList.item(i);
+
+			if (xNode.getNodeType() == Node.ELEMENT_NODE) {
+				Element xElem = (Element) xNode;
+
+				String xId = xElem.getAttribute("id");
+				String xTitle = xElem.getAttribute("title");
+				String xType = xElem.getAttribute("type");
+				String xDefault = null;
+
+				if(xNode.hasChildNodes()) {
+					NodeList childNodes = xNode.getChildNodes();
+					for(int j=0; j< childNodes.getLength(); j++) {
+						Node childNode = childNodes.item(j);
+						if(childNode.getNodeName().equalsIgnoreCase("default")) {
+							xDefault = childNode.getTextContent().trim();
+						}
+					}
+				}
+
+				if(xDefault == null || xDefault.length() == 0) {
+					cyTable.createColumn(xTitle, GetClass(xType), false);
+				}
+				else {
+					if(xType.equalsIgnoreCase("integer")) {
+						cyTable.createColumn(xTitle, GetClass(xType), false, Integer.parseInt(xDefault));
+					} else if(xType.equalsIgnoreCase("double")) {
+						cyTable.createColumn(xTitle, GetClass(xType), false, Double.parseDouble(xDefault));
+					} else if(xType.equalsIgnoreCase("float")) {
+						//float not supported
+						cyTable.createColumn(xTitle, GetClass(xType), false, Double.parseDouble(xDefault));
+					} else if(xType.equalsIgnoreCase("boolean")) {
+						cyTable.createColumn(xTitle, GetClass(xType), false, Boolean.parseBoolean(xDefault));
+					} else if(xType.equalsIgnoreCase("string")) {
+						cyTable.createColumn(xTitle, GetClass(xType), false, xDefault);
+					} else if(xType.equalsIgnoreCase("liststring")) {
+						//TODO liststring is crazy and will require special processing to handle
+						throw new InvalidClassException("liststring");
+					}
+				}
+
+				attMapping.Id.put(xId, xTitle);
+				attMapping.Type.put(xId, xType);
+			}
+		}
+
+		return attMapping;
 	}
-	
+
 	private void ParseNode(Node xNode, CyNetwork cyNetwork, Hashtable<String, Long> idMapping, AttributeMapping attMapping, Document doc, String expression) throws XPathExpressionException, InvalidClassException {
 		if (xNode.getNodeType() == Node.ELEMENT_NODE) {
-        	Element xElem = (Element) xNode;
-        	
-        	String xLabel = xElem.getAttribute("label");
-        	String xId = xElem.getAttribute("id");
-        	
-        	CyNode cyNode = cyNetwork.addNode();
-        	cyNetwork.getRow(cyNode).set(CyNetwork.NAME, xLabel);
+			Element xElem = (Element) xNode;
 
-        	idMapping.put(xId, cyNode.getSUID());
-        	
-        	if(xNode.hasChildNodes()) {
-               String attExpression = expression + "[@id='" + xId + "']/attvalues/attvalue";
-               
-               ParseNodeAttributes(cyNode, cyNetwork, attMapping, doc, attExpression);
-            }
-        }
+			String xLabel = xElem.getAttribute("label");
+			String xId = xElem.getAttribute("id");
+
+			CyNode cyNode = cyNetwork.addNode();
+			cyNetwork.getRow(cyNode).set(CyNetwork.NAME, xLabel);
+
+			idMapping.put(xId, cyNode.getSUID());
+
+			if(xNode.hasChildNodes()) {
+				String attExpression = expression + "[@id='" + xId + "']/attvalues/attvalue";
+
+				ParseNodeAttributes(cyNode, cyNetwork, attMapping, doc, attExpression);
+			}
+		}
 	}
-	
+
 	private void ParseNodeAttributes(CyNode cyNode, CyNetwork cyNetwork, AttributeMapping attMapping, Document doc, String expression) throws XPathExpressionException, InvalidClassException {
-        XPath xPath =  XPathFactory.newInstance().newXPath();
-        NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
-        
-        for (int i = 0; i < nodeList.getLength(); i++) {
-             Node xAttNode = nodeList.item(i);
-             if (xAttNode.getNodeType() == Node.ELEMENT_NODE) {
-            	 Element xElem = (Element) xAttNode;
-            	 String xFor = xElem.getAttribute("for");
-            	 String xValue = xElem.getAttribute("value");
-            	 
-            	 String type = attMapping.Type.get(xFor);
-            	 if(type.equalsIgnoreCase("integer")) {
-            		 cyNetwork.getRow(cyNode).set(attMapping.Id.get(xFor), Integer.parseInt(xValue));
-            	 }
-            	 else if(type.equalsIgnoreCase("double")) {
-            		 cyNetwork.getRow(cyNode).set(attMapping.Id.get(xFor), Double.parseDouble(xValue));
-            	 }
-            	 else if(type.equalsIgnoreCase("float")) {
-            		 //float not supported
-            		 cyNetwork.getRow(cyNode).set(attMapping.Id.get(xFor), Double.parseDouble(xValue));
-            	 }
-            	 else if(type.equalsIgnoreCase("boolean")) {
-            		 cyNetwork.getRow(cyNode).set(attMapping.Id.get(xFor), Boolean.parseBoolean(xValue));
-            	 }
-            	 else if(type.equalsIgnoreCase("string")) {
-            		 cyNetwork.getRow(cyNode).set(attMapping.Id.get(xFor), xValue);
-            	 }
-            	 else if(type.equalsIgnoreCase("liststring")) {
-            		//TODO liststring is crazy and will require special processing to handle
-         			throw new InvalidClassException("liststring");
-            	 }
-             }
-        }
+		XPath xPath =  XPathFactory.newInstance().newXPath();
+		NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
+
+		for (int i = 0; i < nodeList.getLength(); i++) {
+			Node xAttNode = nodeList.item(i);
+			if (xAttNode.getNodeType() == Node.ELEMENT_NODE) {
+				Element xElem = (Element) xAttNode;
+				String xFor = xElem.getAttribute("for");
+				String xValue = xElem.getAttribute("value");
+
+				String type = attMapping.Type.get(xFor);
+				if(type.equalsIgnoreCase("integer")) {
+					cyNetwork.getRow(cyNode).set(attMapping.Id.get(xFor), Integer.parseInt(xValue));
+				}
+				else if(type.equalsIgnoreCase("double")) {
+					cyNetwork.getRow(cyNode).set(attMapping.Id.get(xFor), Double.parseDouble(xValue));
+				}
+				else if(type.equalsIgnoreCase("float")) {
+					//float not supported
+					cyNetwork.getRow(cyNode).set(attMapping.Id.get(xFor), Double.parseDouble(xValue));
+				}
+				else if(type.equalsIgnoreCase("boolean")) {
+					cyNetwork.getRow(cyNode).set(attMapping.Id.get(xFor), Boolean.parseBoolean(xValue));
+				}
+				else if(type.equalsIgnoreCase("string")) {
+					cyNetwork.getRow(cyNode).set(attMapping.Id.get(xFor), xValue);
+				}
+				else if(type.equalsIgnoreCase("liststring")) {
+					//TODO liststring is crazy and will require special processing to handle
+					throw new InvalidClassException("liststring");
+				}
+			}
+		}
 	}
-	
+
 	private void ParseEdges(Document doc, CyNetwork cyNetwork, Hashtable<String, Long> idMapping) throws XPathExpressionException {
 		XPath xPath =  XPathFactory.newInstance().newXPath();
 		String expression = "/gexf/graph/edges/edge";
-        NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
-        for (int i = 0; i < nodeList.getLength(); i++) {
-           Node xNode = nodeList.item(i);
-           
-           if (xNode.getNodeType() == Node.ELEMENT_NODE) {
-           	Element xElem = (Element) xNode;
-           	
-           	String xSource = xElem.getAttribute("source").trim();
-           	String xTarget = xElem.getAttribute("target").trim();
-           	String xId = xElem.getAttribute("id").trim();
-           	
-           	//TODO get the graph type instead of assuming that the graph is directed
-           	cyNetwork.addEdge(cyNetwork.getNode(idMapping.get(xSource)), cyNetwork.getNode(idMapping.get(xTarget)), true);
-           }
-        }
+		NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
+		for (int i = 0; i < nodeList.getLength(); i++) {
+			Node xNode = nodeList.item(i);
+
+			if (xNode.getNodeType() == Node.ELEMENT_NODE) {
+				Element xElem = (Element) xNode;
+
+				String xSource = xElem.getAttribute("source").trim();
+				String xTarget = xElem.getAttribute("target").trim();
+				String xId = xElem.getAttribute("id").trim();
+
+				//TODO get the graph type instead of assuming that the graph is directed
+				cyNetwork.addEdge(cyNetwork.getNode(idMapping.get(xSource)), cyNetwork.getNode(idMapping.get(xTarget)), true);
+			}
+		}
 	}
-	
+
 	private Class GetClass(String type) throws InvalidClassException {
 		if(type.equalsIgnoreCase("integer")) {
 			return Integer.class;
@@ -219,5 +219,5 @@ public class GEXF12Parser {
 			throw new InvalidClassException(type);
 		}
 	}
-	
+
 }

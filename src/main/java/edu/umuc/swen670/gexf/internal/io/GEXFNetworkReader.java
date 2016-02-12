@@ -25,20 +25,20 @@ public class GEXFNetworkReader extends AbstractCyNetworkReader  {
 	private final CyNetworkManager _cyNetworkManager;
 	private final CyRootNetworkManager _cyRootNetworkManager;
 	private CyNetwork _cyNetwork;
-	
+
 	//private static final Logger _logger = LoggerFactory.getLogger(GEXFNetworkReader.class);
-	
+
 	public GEXFNetworkReader(InputStream inputStream, CyNetworkViewFactory cyNetworkViewFactory,
 			CyNetworkFactory cyNetworkFactory, CyNetworkManager cyNetworkManager,
 			CyRootNetworkManager cyRootNetworkManager) {
 		super(inputStream, cyNetworkViewFactory, cyNetworkFactory, cyNetworkManager, cyRootNetworkManager);
-		
+
 		if (inputStream == null) throw new NullPointerException("inputStream cannot be null");
 		if (cyNetworkViewFactory == null) throw new NullPointerException("cyNetworkViewFactory cannot be null");
 		if (cyNetworkFactory == null) throw new NullPointerException("cyNetworkFactory cannot be null");
 		if (cyNetworkManager == null) throw new NullPointerException("cyNetworkManager cannot be null");
 		if (cyRootNetworkManager == null) throw new NullPointerException("cyRootNetworkManager cannot be null");
-		
+
 		_inputStream = inputStream;
 		_cyNetworkViewFactory = cyNetworkViewFactory;
 		_cyNetworkFactory = cyNetworkFactory;
@@ -49,28 +49,28 @@ public class GEXFNetworkReader extends AbstractCyNetworkReader  {
 	@Override
 	public CyNetworkView buildCyNetworkView(CyNetwork network) {
 		final CyNetworkView cyNetworkView = _cyNetworkViewFactory.createNetworkView(network);
-		
+
 		return cyNetworkView;
 	}
 
 	@Override
 	public void run(TaskMonitor monitor) throws Exception {
 		monitor.setTitle("Import GEXF");
-		
+
 		_cyNetwork = _cyNetworkFactory.createNetwork();
-		
+
 		monitor.setStatusMessage("Create nodes");
 		//Thread.sleep(1000);
 		monitor.setProgress(0.50);
-		
+
 		GEXFParser gexfParser = new GEXFParser();
 		gexfParser.ParseStream(_inputStream, _cyNetwork);
-		
+
 
 		monitor.setStatusMessage("Add network");
 		//Thread.sleep(1000);
 		monitor.setProgress(1.00);
-		
+
 		this.networks = new CyNetwork[1];
 		this.networks[0] = _cyNetwork;
 	}
