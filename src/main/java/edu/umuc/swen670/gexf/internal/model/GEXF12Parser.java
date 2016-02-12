@@ -40,6 +40,25 @@ public class GEXF12Parser {
 		Document doc = dBuilder.parse(inputStream);
 
 		doc.getDocumentElement().normalize();
+		
+		XPath xPath =  XPathFactory.newInstance().newXPath();
+		
+		String expression = "/gexf/graph/";
+		NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
+		Element xElem = (Element) nodeList.item(0);
+		
+		String defaultEdgeType = "undirected";
+		if(xElem.hasAttribute("defaultedgetype")) {
+			defaultEdgeType = xElem.getAttribute("defaultedagetype");
+		}
+		
+		String mode = "static";
+		if(xElem.hasAttribute("mode")) {
+			mode = xElem.getAttribute("mode");
+		}
+		
+		
+		//TODO Parse meta
 
 		AttributeMapping attNodeMapping;
 		attNodeMapping = ParseAttributeHeader("node", doc, cyNetwork);
@@ -48,17 +67,15 @@ public class GEXF12Parser {
 		attEdgeMapping = ParseAttributeHeader("edge", doc, cyNetwork);
 
 
-		XPath xPath =  XPathFactory.newInstance().newXPath();
-
-		String expression = "/gexf/graph/nodes/node";
-		NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
+		expression = "/gexf/graph/nodes/node";
+		nodeList = (NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
 		for (int i = 0; i < nodeList.getLength(); i++) {
 			Node xNode = nodeList.item(i);
 
 			ParseNode(xNode, cyNetwork, idMapping, attNodeMapping, doc, expression);
 		}
 
-		ParseEdges(doc, cyNetwork, idMapping, attEdgeMapping);
+		ParseEdges(doc, cyNetwork, idMapping, attEdgeMapping, defaultEdgeType);
 	}
 
 	private AttributeMapping ParseAttributeHeader(String attributeClass, Document doc, CyNetwork cyNetwork) throws XPathExpressionException, InvalidClassException {
@@ -183,7 +200,7 @@ public class GEXF12Parser {
 		}
 	}
 
-	private void ParseEdges(Document doc, CyNetwork cyNetwork, Hashtable<String, Long> idMapping, AttributeMapping attMapping) throws XPathExpressionException, InvalidClassException {
+	private void ParseEdges(Document doc, CyNetwork cyNetwork, Hashtable<String, Long> idMapping, AttributeMapping attMapping, String defaultEdgeType) throws XPathExpressionException, InvalidClassException {
 		XPath xPath =  XPathFactory.newInstance().newXPath();
 		String expression = "/gexf/graph/edges/edge";
 		NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
@@ -193,12 +210,13 @@ public class GEXF12Parser {
 			if (xNode.getNodeType() == Node.ELEMENT_NODE) {
 				Element xElem = (Element) xNode;
 
+				String xId = xElem.getAttribute("id").trim();
 				String xSource = xElem.getAttribute("source").trim();
 				String xTarget = xElem.getAttribute("target").trim();
-				String xId = xElem.getAttribute("id").trim();
+				String xEdgeType = xElem.hasAttribute("edgetype") ? xElem.getAttribute("edgetype") : defaultEdgeType;
+				
 
-				//TODO get the graph type instead of assuming that the graph is directed
-				CyEdge cyEdge = cyNetwork.addEdge(cyNetwork.getNode(idMapping.get(xSource)), cyNetwork.getNode(idMapping.get(xTarget)), true);
+				CyEdge cyEdge = cyNetwork.addEdge(cyNetwork.getNode(idMapping.get(xSource)), cyNetwork.getNode(idMapping.get(xTarget)), IsDirected(xEdgeType));
 				
 				if(xNode.hasChildNodes()) {
 					String attExpression = expression + "[@id='" + xId + "']/attvalues/attvalue";
@@ -232,6 +250,21 @@ public class GEXF12Parser {
 		}
 		else {
 			throw new InvalidClassException(type);
+		}
+	}
+	
+	private Boolean IsDirected(String direction) {
+		if(direction.equalsIgnoreCase("directed")) {
+			return true;
+		}
+		else if(direction.equalsIgnoreCase("undirected")) {
+			return false;
+		}
+		else if (direction.equalsIgnoreCase("mutual")) {
+			return false;
+		}
+		else {
+			throw new IllegalArgumentException(direction);
 		}
 	}
 
