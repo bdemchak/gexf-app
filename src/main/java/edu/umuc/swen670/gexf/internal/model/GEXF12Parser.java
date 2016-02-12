@@ -47,15 +47,8 @@ public class GEXF12Parser {
 		NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
 		Element xElem = (Element) nodeList.item(0);
 		
-		String defaultEdgeType = "undirected";
-		if(xElem.hasAttribute("defaultedgetype")) {
-			defaultEdgeType = xElem.getAttribute("defaultedagetype");
-		}
-		
-		String mode = "static";
-		if(xElem.hasAttribute("mode")) {
-			mode = xElem.getAttribute("mode");
-		}
+		String defaultEdgeType = xElem.hasAttribute("defaultedgetype") ? xElem.getAttribute("defaultedagetype").trim() : "undirected";
+		String mode = xElem.hasAttribute("mode") ? mode = xElem.getAttribute("mode").trim() : "static";
 		
 		
 		//TODO Parse meta
@@ -65,6 +58,7 @@ public class GEXF12Parser {
 		
 		AttributeMapping attEdgeMapping;
 		attEdgeMapping = ParseAttributeHeader("edge", doc, cyNetwork);
+		cyNetwork.getDefaultEdgeTable().createColumn("edgetype", String.class, true);
 
 
 		expression = "/gexf/graph/nodes/node";
@@ -100,9 +94,9 @@ public class GEXF12Parser {
 			if (xNode.getNodeType() == Node.ELEMENT_NODE) {
 				Element xElem = (Element) xNode;
 
-				String xId = xElem.getAttribute("id");
-				String xTitle = xElem.getAttribute("title");
-				String xType = xElem.getAttribute("type");
+				String xId = xElem.getAttribute("id").trim();
+				String xTitle = xElem.getAttribute("title").trim();
+				String xType = xElem.getAttribute("type").trim();
 				String xDefault = null;
 
 				if(xNode.hasChildNodes()) {
@@ -172,8 +166,8 @@ public class GEXF12Parser {
 			Node xAttNode = nodeList.item(i);
 			if (xAttNode.getNodeType() == Node.ELEMENT_NODE) {
 				Element xElem = (Element) xAttNode;
-				String xFor = xElem.getAttribute("for");
-				String xValue = xElem.getAttribute("value");
+				String xFor = xElem.getAttribute("for").trim();
+				String xValue = xElem.getAttribute("value").trim();
 
 				String type = attMapping.Type.get(xFor);
 				if(type.equalsIgnoreCase("integer")) {
@@ -213,10 +207,14 @@ public class GEXF12Parser {
 				String xId = xElem.getAttribute("id").trim();
 				String xSource = xElem.getAttribute("source").trim();
 				String xTarget = xElem.getAttribute("target").trim();
-				String xEdgeType = xElem.hasAttribute("edgetype") ? xElem.getAttribute("edgetype") : defaultEdgeType;
+				String xEdgeType = xElem.hasAttribute("edgetype") ? xElem.getAttribute("edgetype").trim() : defaultEdgeType;
 				
 
 				CyEdge cyEdge = cyNetwork.addEdge(cyNetwork.getNode(idMapping.get(xSource)), cyNetwork.getNode(idMapping.get(xTarget)), IsDirected(xEdgeType));
+				
+				if(xElem.hasAttribute("edgetype")) {
+					cyNetwork.getRow(cyEdge).set("edgetype", xEdgeType);
+				}
 				
 				if(xNode.hasChildNodes()) {
 					String attExpression = expression + "[@id='" + xId + "']/attvalues/attvalue";
