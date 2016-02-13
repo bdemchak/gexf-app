@@ -43,11 +43,11 @@ public class GEXF12Parser {
 		
 		XPath xPath =  XPathFactory.newInstance().newXPath();
 		
-		String expression = "/gexf/graph/";
+		String expression = "/gexf/graph";
 		NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
 		Element xElem = (Element) nodeList.item(0);
 		
-		String defaultEdgeType = xElem.hasAttribute("defaultedgetype") ? xElem.getAttribute("defaultedagetype").trim() : "undirected";
+		String defaultEdgeType = xElem.hasAttribute("defaultedgetype") ? xElem.getAttribute("defaultedgetype").trim() : "undirected";
 		String mode = xElem.hasAttribute("mode") ? mode = xElem.getAttribute("mode").trim() : "static";
 		
 		
