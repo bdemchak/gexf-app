@@ -113,20 +113,20 @@ public class GEXF12Parser {
 					cyTable.createColumn(xTitle, GetClass(xType), false);
 				}
 				else {
-					if(xType.equalsIgnoreCase("integer")) {
+					if(xType.equalsIgnoreCase(DataTypes.INTEGER)) {
 						cyTable.createColumn(xTitle, GetClass(xType), false, Integer.parseInt(xDefault));
-					} else if(xType.equalsIgnoreCase("double")) {
+					} else if(xType.equalsIgnoreCase(DataTypes.DOUBLE)) {
 						cyTable.createColumn(xTitle, GetClass(xType), false, Double.parseDouble(xDefault));
-					} else if(xType.equalsIgnoreCase("float")) {
+					} else if(xType.equalsIgnoreCase(DataTypes.FLOAT)) {
 						//float not supported
 						cyTable.createColumn(xTitle, GetClass(xType), false, Double.parseDouble(xDefault));
-					} else if(xType.equalsIgnoreCase("boolean")) {
+					} else if(xType.equalsIgnoreCase(DataTypes.BOOLEAN)) {
 						cyTable.createColumn(xTitle, GetClass(xType), false, Boolean.parseBoolean(xDefault));
-					} else if(xType.equalsIgnoreCase("string")) {
+					} else if(xType.equalsIgnoreCase(DataTypes.STRING)) {
 						cyTable.createColumn(xTitle, GetClass(xType), false, xDefault);
-					} else if(xType.equalsIgnoreCase("liststring")) {
+					} else if(xType.equalsIgnoreCase(DataTypes.LISTSTRING)) {
 						//TODO liststring is crazy and will require special processing to handle
-						throw new InvalidClassException("liststring");
+						throw new InvalidClassException(DataTypes.LISTSTRING);
 					}
 				}
 
