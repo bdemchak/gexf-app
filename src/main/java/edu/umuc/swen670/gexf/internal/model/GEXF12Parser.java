@@ -94,16 +94,16 @@ public class GEXF12Parser {
 			if (xNode.getNodeType() == Node.ELEMENT_NODE) {
 				Element xElem = (Element) xNode;
 
-				String xId = xElem.getAttribute("id").trim();
-				String xTitle = xElem.getAttribute("title").trim();
-				String xType = xElem.getAttribute("type").trim();
+				String xId = xElem.getAttribute(GEXFAttribute.ID).trim();
+				String xTitle = xElem.getAttribute(GEXFAttribute.TITLE).trim();
+				String xType = xElem.getAttribute(GEXFAttribute.TYPE).trim();
 				String xDefault = null;
 
 				if(xNode.hasChildNodes()) {
 					NodeList childNodes = xNode.getChildNodes();
 					for(int j=0; j< childNodes.getLength(); j++) {
 						Node childNode = childNodes.item(j);
-						if(childNode.getNodeName().equalsIgnoreCase("default")) {
+						if(childNode.getNodeName().equalsIgnoreCase(GEXFAttribute.DEFAULT)) {
 							xDefault = childNode.getTextContent().trim();
 						}
 					}
