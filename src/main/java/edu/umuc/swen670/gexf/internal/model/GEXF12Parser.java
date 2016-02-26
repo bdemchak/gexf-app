@@ -27,7 +27,7 @@ import org.xml.sax.SAXException;
 import edu.umuc.swen670.gexf.internal.io.GEXFFileFilter;
 
 public class GEXF12Parser {
-
+	
 	public void ParseStream(InputStream inputStream, CyNetwork cyNetwork) throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
 
 		Hashtable<String, Long> idMapping = new Hashtable<String, Long>();
@@ -170,25 +170,25 @@ public class GEXF12Parser {
 				String xValue = xElem.getAttribute("value").trim();
 
 				String type = attMapping.Type.get(xFor);
-				if(type.equalsIgnoreCase("integer")) {
+				if(type.equalsIgnoreCase(DataTypes.INTEGER)) {
 					cyNetwork.getRow(cyIdentifiable).set(attMapping.Id.get(xFor), Integer.parseInt(xValue));
 				}
-				else if(type.equalsIgnoreCase("double")) {
+				else if(type.equalsIgnoreCase(DataTypes.DOUBLE)) {
 					cyNetwork.getRow(cyIdentifiable).set(attMapping.Id.get(xFor), Double.parseDouble(xValue));
 				}
-				else if(type.equalsIgnoreCase("float")) {
+				else if(type.equalsIgnoreCase(DataTypes.FLOAT)) {
 					//float not supported
 					cyNetwork.getRow(cyIdentifiable).set(attMapping.Id.get(xFor), Double.parseDouble(xValue));
 				}
-				else if(type.equalsIgnoreCase("boolean")) {
+				else if(type.equalsIgnoreCase(DataTypes.BOOLEAN)) {
 					cyNetwork.getRow(cyIdentifiable).set(attMapping.Id.get(xFor), Boolean.parseBoolean(xValue));
 				}
-				else if(type.equalsIgnoreCase("string")) {
+				else if(type.equalsIgnoreCase(DataTypes.STRING)) {
 					cyNetwork.getRow(cyIdentifiable).set(attMapping.Id.get(xFor), xValue);
 				}
-				else if(type.equalsIgnoreCase("liststring")) {
+				else if(type.equalsIgnoreCase(DataTypes.LISTSTRING)) {
 					//TODO liststring is crazy and will require special processing to handle
-					throw new InvalidClassException("liststring");
+					throw new InvalidClassException(DataTypes.LISTSTRING);
 				}
 			}
 		}
@@ -226,23 +226,23 @@ public class GEXF12Parser {
 	}
 
 	private Class GetClass(String type) throws InvalidClassException {
-		if(type.equalsIgnoreCase("integer")) {
+		if(type.equalsIgnoreCase(DataTypes.INTEGER)) {
 			return Integer.class;
 		}
-		else if(type.equalsIgnoreCase("double")) {
+		else if(type.equalsIgnoreCase(DataTypes.DOUBLE)) {
 			return Double.class;
 		}
-		else if(type.equalsIgnoreCase("float")) {
+		else if(type.equalsIgnoreCase(DataTypes.FLOAT)) {
 			//float not supported
 			return Double.class;
 		}
-		else if(type.equalsIgnoreCase("boolean")) {
+		else if(type.equalsIgnoreCase(DataTypes.BOOLEAN)) {
 			return Boolean.class;
 		}
-		else if(type.equalsIgnoreCase("string")) {
+		else if(type.equalsIgnoreCase(DataTypes.STRING)) {
 			return String.class;
 		}
-		else if(type.equalsIgnoreCase("liststring")) {
+		else if(type.equalsIgnoreCase(DataTypes.LISTSTRING)) {
 			//TODO liststring is crazy and will require special processing to handle
 			throw new InvalidClassException(type);
 		}
