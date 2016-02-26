@@ -47,7 +47,7 @@ public class GEXF12Parser {
 		NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
 		Element xElem = (Element) nodeList.item(0);
 		
-		String defaultEdgeType = xElem.hasAttribute("defaultedgetype") ? xElem.getAttribute("defaultedgetype").trim() : "undirected";
+		String defaultEdgeType = xElem.hasAttribute("defaultedgetype") ? xElem.getAttribute("defaultedgetype").trim() : EdgeTypes.UNDIRECTED;
 		String mode = xElem.hasAttribute("mode") ? mode = xElem.getAttribute("mode").trim() : "static";
 		
 		
