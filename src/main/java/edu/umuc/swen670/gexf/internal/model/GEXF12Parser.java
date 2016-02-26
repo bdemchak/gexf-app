@@ -166,8 +166,8 @@ public class GEXF12Parser {
 			Node xAttNode = nodeList.item(i);
 			if (xAttNode.getNodeType() == Node.ELEMENT_NODE) {
 				Element xElem = (Element) xAttNode;
-				String xFor = xElem.getAttribute("for").trim();
-				String xValue = xElem.getAttribute("value").trim();
+				String xFor = xElem.getAttribute(GEXFAttribute.FOR).trim();
+				String xValue = xElem.getAttribute(GEXFAttribute.VALUE).trim();
 
 				String type = attMapping.Type.get(xFor);
 				if(type.equalsIgnoreCase(DataTypes.INTEGER)) {
