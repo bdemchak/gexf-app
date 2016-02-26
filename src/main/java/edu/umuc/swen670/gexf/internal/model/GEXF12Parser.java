@@ -142,8 +142,8 @@ public class GEXF12Parser {
 		if (xNode.getNodeType() == Node.ELEMENT_NODE) {
 			Element xElem = (Element) xNode;
 
-			String xLabel = xElem.getAttribute("label");
-			String xId = xElem.getAttribute("id");
+			String xLabel = xElem.getAttribute(GEXFNode.LABEL);
+			String xId = xElem.getAttribute(GEXFNode.ID);
 
 			CyNode cyNode = cyNetwork.addNode();
 			cyNetwork.getRow(cyNode).set(CyNetwork.NAME, xLabel);
