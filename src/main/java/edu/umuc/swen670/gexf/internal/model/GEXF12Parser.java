@@ -252,13 +252,13 @@ public class GEXF12Parser {
 	}
 	
 	private Boolean IsDirected(String direction) {
-		if(direction.equalsIgnoreCase("directed")) {
+		if(direction.equalsIgnoreCase(EdgeTypes.DIRECTED)) {
 			return true;
 		}
-		else if(direction.equalsIgnoreCase("undirected")) {
+		else if(direction.equalsIgnoreCase(EdgeTypes.UNDIRECTED)) {
 			return false;
 		}
-		else if (direction.equalsIgnoreCase("mutual")) {
+		else if (direction.equalsIgnoreCase(EdgeTypes.MUTUAL)) {
 			return false;
 		}
 		else {
