@@ -58,7 +58,7 @@ public class GEXF12Parser {
 		
 		AttributeMapping attEdgeMapping;
 		attEdgeMapping = ParseAttributeHeader("edge", doc, cyNetwork);
-		cyNetwork.getDefaultEdgeTable().createColumn("edgetype", String.class, true);
+		cyNetwork.getDefaultEdgeTable().createColumn(GEXFEdge.EDGETYPE, String.class, true);
 
 
 		expression = "/gexf/graph/nodes/node";
@@ -204,16 +204,16 @@ public class GEXF12Parser {
 			if (xNode.getNodeType() == Node.ELEMENT_NODE) {
 				Element xElem = (Element) xNode;
 
-				String xId = xElem.getAttribute("id").trim();
-				String xSource = xElem.getAttribute("source").trim();
-				String xTarget = xElem.getAttribute("target").trim();
-				String xEdgeType = xElem.hasAttribute("edgetype") ? xElem.getAttribute("edgetype").trim() : defaultEdgeType;
+				String xId = xElem.getAttribute(GEXFEdge.ID).trim();
+				String xSource = xElem.getAttribute(GEXFEdge.SOURCE).trim();
+				String xTarget = xElem.getAttribute(GEXFEdge.TARGET).trim();
+				String xEdgeType = xElem.hasAttribute(GEXFEdge.EDGETYPE) ? xElem.getAttribute(GEXFEdge.EDGETYPE).trim() : defaultEdgeType;
 				
 
 				CyEdge cyEdge = cyNetwork.addEdge(cyNetwork.getNode(idMapping.get(xSource)), cyNetwork.getNode(idMapping.get(xTarget)), IsDirected(xEdgeType));
 				
-				if(xElem.hasAttribute("edgetype")) {
-					cyNetwork.getRow(cyEdge).set("edgetype", xEdgeType);
+				if(xElem.hasAttribute(GEXFEdge.EDGETYPE)) {
+					cyNetwork.getRow(cyEdge).set(GEXFEdge.EDGETYPE, xEdgeType);
 				}
 				
 				if(xNode.hasChildNodes()) {
