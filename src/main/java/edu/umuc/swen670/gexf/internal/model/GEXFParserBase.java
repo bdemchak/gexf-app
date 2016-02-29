@@ -14,6 +14,7 @@ import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
+import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -38,6 +39,45 @@ abstract class GEXFParserBase {
 	}
 	
 	public abstract void ParseStream() throws XPathExpressionException, ParserConfigurationException, SAXException, IOException;
+	
+	protected void ParseMeta() throws XPathExpressionException, InvalidClassException {
+		XPath xPath = XPathFactory.newInstance().newXPath();
+		String expression = "/gexf/meta";
+		NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(_doc, XPathConstants.NODESET);
+		
+		if(nodeList.getLength() == 1) {
+			Node metaNode = nodeList.item(0);
+			
+			CyTable cyTable = _cyNetwork.getDefaultNetworkTable();
+			CyRow cyRow = cyTable.getRow(_cyNetwork);
+			
+			Element metaElement = (Element) metaNode;
+			if(metaElement.hasAttribute(GEXFMeta.LASTMODIFIEDDATE)) {
+				cyTable.createColumn(GEXFMeta.LASTMODIFIEDDATE, String.class, false);
+				
+				cyRow.set(GEXFMeta.LASTMODIFIEDDATE, metaElement.getAttribute(GEXFMeta.LASTMODIFIEDDATE).trim());
+			}
+			
+			if(metaNode.hasChildNodes()) {
+				NodeList childNodes = metaNode.getChildNodes();
+				for(int i=0; i<childNodes.getLength(); i++) {
+					Node childNode = childNodes.item(i);
+					
+					if(childNode.getNodeName().trim().equalsIgnoreCase(GEXFMeta.CREATOR) || 
+							childNode.getNodeName().trim().equalsIgnoreCase(GEXFMeta.KEYWORDS) || 
+							childNode.getNodeName().trim().equalsIgnoreCase(GEXFMeta.DESCRIPTION)) {
+						cyTable.createColumn(childNode.getNodeName().trim().toLowerCase(), String.class, false);
+						
+						cyRow.set(childNode.getNodeName().trim().toLowerCase(), childNode.getTextContent().trim());
+					}
+					else {
+						throw new InvalidClassException(childNode.getNodeName().trim());
+					}
+				}
+			}
+			
+		}
+	}
 	
 	protected AttributeMapping ParseAttributeHeader(String attributeClass) throws XPathExpressionException, InvalidClassException {
 		AttributeMapping attMapping = new AttributeMapping();

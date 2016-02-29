@@ -35,6 +35,8 @@ public class GEXF12Parser extends GEXFParserBase {
 	@Override
 	public void ParseStream() throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
 	
+		ParseMeta();
+		
 		XPath xPath =  XPathFactory.newInstance().newXPath();
 		
 		String expression = "/gexf/graph";
@@ -43,9 +45,7 @@ public class GEXF12Parser extends GEXFParserBase {
 		
 		String defaultEdgeType = xElem.hasAttribute(GEXFGraph.DEFAULTEDGETYPE) ? xElem.getAttribute(GEXFGraph.DEFAULTEDGETYPE).trim() : EdgeTypes.UNDIRECTED;
 		String mode = xElem.hasAttribute(GEXFGraph.MODE) ? xElem.getAttribute(GEXFGraph.MODE).trim() : GEXFGraph.STATIC;
-		
-		
-		//TODO Parse meta
+
 
 		_attNodeMapping = ParseAttributeHeader("node");
 		
