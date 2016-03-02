@@ -13,6 +13,7 @@ public final class GEXFGraph {
 	public static final String VERSION10 = "1.0";
 	public static final String VERSION11 = "1.1";
 	public static final String VERSION12 = "1.2";
+	public static final String VERSION13 = "1.3";
 	
 	private GEXFGraph(){}
 }

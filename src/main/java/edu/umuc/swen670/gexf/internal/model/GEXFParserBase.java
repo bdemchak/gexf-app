@@ -3,6 +3,7 @@ package edu.umuc.swen670.gexf.internal.model;
 import java.io.IOException;
 import java.io.InvalidClassException;
 import java.util.Hashtable;
+import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
@@ -49,7 +50,7 @@ abstract class GEXFParserBase {
 			Node metaNode = nodeList.item(0);
 			
 			CyTable cyTable = _cyNetwork.getDefaultNetworkTable();
-			CyRow cyRow = cyTable.getRow(_cyNetwork);
+			CyRow cyRow = cyTable.getRow(_cyNetwork.getSUID());
 			
 			Element metaElement = (Element) metaNode;
 			if(metaElement.hasAttribute(GEXFMeta.LASTMODIFIEDDATE)) {
@@ -62,6 +63,9 @@ abstract class GEXFParserBase {
 				NodeList childNodes = metaNode.getChildNodes();
 				for(int i=0; i<childNodes.getLength(); i++) {
 					Node childNode = childNodes.item(i);
+					
+					//skip TEXT_NODE items
+					if(childNode.getNodeType() != Node.ELEMENT_NODE) continue;
 					
 					if(childNode.getNodeName().trim().equalsIgnoreCase(GEXFMeta.CREATOR) || 
 							childNode.getNodeName().trim().equalsIgnoreCase(GEXFMeta.KEYWORDS) || 
@@ -79,7 +83,8 @@ abstract class GEXFParserBase {
 		}
 	}
 	
-	protected AttributeMapping ParseAttributeHeader(String attributeClass) throws XPathExpressionException, InvalidClassException {
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	protected AttributeMapping ParseAttributeHeader(String attributeClass) throws XPathExpressionException, IOException {
 		AttributeMapping attMapping = new AttributeMapping();
 
 		CyTable cyTable;
@@ -115,25 +120,23 @@ abstract class GEXFParserBase {
 						}
 					}
 				}
+				
+				Class type = GetClass(xType);
 
 				if(xDefault == null || xDefault.length() == 0) {
-					cyTable.createColumn(xTitle, GetClass(xType), false);
+					if(!type.isArray()) {
+						cyTable.createColumn(xTitle, type, false);
+					}
+					else {
+						cyTable.createListColumn(xTitle, type.getComponentType(), false);
+					}
 				}
 				else {
-					if(xType.equalsIgnoreCase(DataTypes.INTEGER)) {
-						cyTable.createColumn(xTitle, GetClass(xType), false, Integer.parseInt(xDefault));
-					} else if(xType.equalsIgnoreCase(DataTypes.DOUBLE)) {
-						cyTable.createColumn(xTitle, GetClass(xType), false, Double.parseDouble(xDefault));
-					} else if(xType.equalsIgnoreCase(DataTypes.FLOAT)) {
-						//float not supported
-						cyTable.createColumn(xTitle, GetClass(xType), false, Double.parseDouble(xDefault));
-					} else if(xType.equalsIgnoreCase(DataTypes.BOOLEAN)) {
-						cyTable.createColumn(xTitle, GetClass(xType), false, Boolean.parseBoolean(xDefault));
-					} else if(xType.equalsIgnoreCase(DataTypes.STRING)) {
-						cyTable.createColumn(xTitle, GetClass(xType), false, xDefault);
-					} else if(xType.equalsIgnoreCase(DataTypes.LISTSTRING)) {
-						//TODO liststring is crazy and will require special processing to handle
-						throw new InvalidClassException(DataTypes.LISTSTRING);
+					if(!type.isArray()) {
+						cyTable.createColumn(xTitle, type, false, GenericParse(xDefault, type));
+					}
+					else {
+						cyTable.createListColumn(xTitle, type.getComponentType(), false, ParseArray(xDefault, type.getComponentType()));
 					}
 				}
 
@@ -145,7 +148,7 @@ abstract class GEXFParserBase {
 		return attMapping;
 	}
 	
-	protected void ParseNode(Node xNode, String expression) throws XPathExpressionException, InvalidClassException {
+	protected void ParseNode(Node xNode, String expression) throws XPathExpressionException, IOException {
 		if (xNode.getNodeType() == Node.ELEMENT_NODE) {
 			Element xElem = (Element) xNode;
 
@@ -165,7 +168,7 @@ abstract class GEXFParserBase {
 		}
 	}
 	
-	protected void ParseEdges(String defaultEdgeType) throws XPathExpressionException, InvalidClassException {
+	protected void ParseEdges(String defaultEdgeType) throws XPathExpressionException, IOException {
 		XPath xPath =  XPathFactory.newInstance().newXPath();
 		String expression = "/gexf/graph/edges/edge";
 		NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(_doc, XPathConstants.NODESET);
@@ -196,7 +199,8 @@ abstract class GEXFParserBase {
 		}
 	}
 	
-	protected void ParseAttributes(CyIdentifiable cyIdentifiable, AttributeMapping attMapping, String expression) throws XPathExpressionException, InvalidClassException {
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	protected void ParseAttributes(CyIdentifiable cyIdentifiable, AttributeMapping attMapping, String expression) throws XPathExpressionException, IOException {
 		XPath xPath =  XPathFactory.newInstance().newXPath();
 		NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(_doc, XPathConstants.NODESET);
 
@@ -207,40 +211,54 @@ abstract class GEXFParserBase {
 				String xFor = xElem.getAttribute(GEXFAttribute.FOR).trim();
 				String xValue = xElem.getAttribute(GEXFAttribute.VALUE).trim();
 
-				String type = attMapping.Type.get(xFor);
-				if(type.equalsIgnoreCase(DataTypes.INTEGER)) {
-					_cyNetwork.getRow(cyIdentifiable).set(attMapping.Id.get(xFor), Integer.parseInt(xValue));
+				Class type = GetClass(attMapping.Type.get(xFor));
+				if(!type.isArray()) {
+					_cyNetwork.getRow(cyIdentifiable).set(attMapping.Id.get(xFor), GenericParse(xValue, type));
 				}
-				else if(type.equalsIgnoreCase(DataTypes.DOUBLE)) {
-					_cyNetwork.getRow(cyIdentifiable).set(attMapping.Id.get(xFor), Double.parseDouble(xValue));
-				}
-				else if(type.equalsIgnoreCase(DataTypes.FLOAT)) {
-					//float not supported
-					_cyNetwork.getRow(cyIdentifiable).set(attMapping.Id.get(xFor), Double.parseDouble(xValue));
-				}
-				else if(type.equalsIgnoreCase(DataTypes.BOOLEAN)) {
-					_cyNetwork.getRow(cyIdentifiable).set(attMapping.Id.get(xFor), Boolean.parseBoolean(xValue));
-				}
-				else if(type.equalsIgnoreCase(DataTypes.STRING)) {
-					_cyNetwork.getRow(cyIdentifiable).set(attMapping.Id.get(xFor), xValue);
-				}
-				else if(type.equalsIgnoreCase(DataTypes.LISTSTRING)) {
-					//TODO liststring is crazy and will require special processing to handle
-					throw new InvalidClassException(DataTypes.LISTSTRING);
+				else {
+					_cyNetwork.getRow(cyIdentifiable).set(attMapping.Id.get(xFor), ParseArray(xValue, type));
 				}
 			}
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
+	protected <T> T GenericParse(String value, Class<T> type) throws InvalidClassException {
+		if(type.equals(Integer.class)) {
+			return (T)(Integer)Integer.parseInt(value);
+		}
+		else if(type.equals(Long.class)) {
+			return (T)(Long)Long.parseLong(value);
+		}
+		else if(type.equals(Double.class)) {
+			return (T)(Double)Double.parseDouble(value);
+		}
+		else if(type.equals(Boolean.class)) {
+			return (T)(Boolean)Boolean.parseBoolean(value);
+		}
+		else if(type.equals(String.class)) {
+			return (T)value;
+		}
+		else {
+			throw new InvalidClassException(type.getName());
+		}
+	}
+	
+	protected abstract <T> List<T> ParseArray(String array, Class<T> type) throws IOException;
+	
+	@SuppressWarnings("rawtypes")
 	protected Class GetClass(String type) throws InvalidClassException {
 		if(type.equalsIgnoreCase(DataTypes.INTEGER)) {
 			return Integer.class;
 		}
-		else if(type.equalsIgnoreCase(DataTypes.DOUBLE)) {
-			return Double.class;
+		if(type.equalsIgnoreCase(DataTypes.LONG)) {
+			return Long.class;
 		}
 		else if(type.equalsIgnoreCase(DataTypes.FLOAT)) {
 			//float not supported
+			return Double.class;
+		}
+		else if(type.equalsIgnoreCase(DataTypes.DOUBLE)) {
 			return Double.class;
 		}
 		else if(type.equalsIgnoreCase(DataTypes.BOOLEAN)) {
@@ -249,9 +267,23 @@ abstract class GEXFParserBase {
 		else if(type.equalsIgnoreCase(DataTypes.STRING)) {
 			return String.class;
 		}
+		else if(type.equalsIgnoreCase(DataTypes.LISTINTEGER)) {
+			return Integer[].class;
+		}
+		else if(type.equalsIgnoreCase(DataTypes.LISTLONG)) {
+			return Long[].class;
+		}
+		else if(type.equalsIgnoreCase(DataTypes.LISTFLOAT)) {
+			return Double[].class;
+		}
+		else if(type.equalsIgnoreCase(DataTypes.LISTDOUBLE)) {
+			return Double[].class;
+		}
+		else if(type.equalsIgnoreCase(DataTypes.LISTBOOLEAN)) {
+			return Boolean[].class;
+		}
 		else if(type.equalsIgnoreCase(DataTypes.LISTSTRING)) {
-			//TODO liststring is crazy and will require special processing to handle
-			throw new InvalidClassException(type);
+			return String[].class;
 		}
 		else {
 			throw new InvalidClassException(type);

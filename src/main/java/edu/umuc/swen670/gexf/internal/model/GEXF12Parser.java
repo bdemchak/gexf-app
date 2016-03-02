@@ -3,7 +3,9 @@ package edu.umuc.swen670.gexf.internal.model;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InvalidClassException;
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -62,6 +64,18 @@ public class GEXF12Parser extends GEXFParserBase {
 		}
 
 		ParseEdges(defaultEdgeType);
+	}
+	
+	@Override
+	protected <T> List<T> ParseArray(String array, Class<T> type) throws IOException {
+		String[] values = array.split("|");
+		
+		List<T> list = new ArrayList<T>();
+		for(String value : values) {
+			list.add(GenericParse(value.trim(), type));
+		}
+		
+		return list;
 	}
 	
 	@Override

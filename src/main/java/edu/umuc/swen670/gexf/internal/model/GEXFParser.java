@@ -50,9 +50,12 @@ public class GEXFParser {
 		else if(version.equalsIgnoreCase(GEXFGraph.VERSION12)) {
 			parser = new GEXF12Parser(doc, cyNetwork, version);
 		}
+		else if(version.equalsIgnoreCase(GEXFGraph.VERSION13)) {
+			parser = new GEXF13Parser(doc, cyNetwork, version);
+		}
 		else {
 			//try to parse with the latest supported version
-			parser = new GEXF12Parser(doc, cyNetwork, version);
+			parser = new GEXF13Parser(doc, cyNetwork, version);
 		}
 
 		parser.ParseStream();
