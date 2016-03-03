@@ -76,10 +76,20 @@ public class GEXF10Parser extends GEXFParserBase {
 			return false;
 		}
 		else if (direction.equalsIgnoreCase(EdgeTypes.DOUBLE) || direction.equalsIgnoreCase(EdgeTypes.DOU)) {
-			return false;
+			return true;
 		}
 		else {
 			throw new IllegalArgumentException(direction);
+		}
+	}
+
+	@Override
+	protected Boolean IsBiDirectional(String direction) {
+		if (direction.equalsIgnoreCase(EdgeTypes.DOUBLE) || direction.equalsIgnoreCase(EdgeTypes.DOU)) {
+			return true;
+		}
+		else {
+			return false;
 		}
 	}
 

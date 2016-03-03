@@ -87,10 +87,20 @@ public class GEXF12Parser extends GEXFParserBase {
 			return false;
 		}
 		else if (direction.equalsIgnoreCase(EdgeTypes.MUTUAL)) {
-			return false;
+			return true;
 		}
 		else {
 			throw new IllegalArgumentException(direction);
+		}
+	}
+
+	@Override
+	protected Boolean IsBiDirectional(String direction) {
+		if (direction.equalsIgnoreCase(EdgeTypes.MUTUAL)) {
+			return true;
+		}
+		else {
+			return false;
 		}
 	}
 

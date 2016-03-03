@@ -185,15 +185,18 @@ abstract class GEXFParserBase {
 				
 
 				CyEdge cyEdge = _cyNetwork.addEdge(_cyNetwork.getNode(_idMapping.get(xSource)), _cyNetwork.getNode(_idMapping.get(xTarget)), IsDirected(xEdgeType));
+				CyEdge cyEdgeReverse = IsBiDirectional(xEdgeType) ? _cyNetwork.addEdge(_cyNetwork.getNode(_idMapping.get(xTarget)), _cyNetwork.getNode(_idMapping.get(xSource)), IsDirected(xEdgeType)) : null;
 				
 				if(xElem.hasAttribute(GEXFEdge.EDGETYPE)) {
 					_cyNetwork.getRow(cyEdge).set(GEXFEdge.EDGETYPE, xEdgeType);
+					if(cyEdgeReverse!=null) _cyNetwork.getRow(cyEdgeReverse).set(GEXFEdge.EDGETYPE, xEdgeType);
 				}
 				
 				if(xNode.hasChildNodes()) {
 					String attExpression = expression + "[@id='" + xId + "']/attvalues/attvalue";
 					
 					ParseAttributes(cyEdge, _attEdgeMapping, attExpression);
+					if(cyEdgeReverse!=null) ParseAttributes(cyEdgeReverse, _attEdgeMapping, attExpression);
 				}
 			}
 		}
@@ -291,4 +294,6 @@ abstract class GEXFParserBase {
 	}
 	
 	protected abstract Boolean IsDirected(String direction);
+	
+	protected abstract Boolean IsBiDirectional(String direction);
 }
