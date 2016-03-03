@@ -37,7 +37,7 @@ import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.work.TaskMonitor;
 
 
-public class BasicTest {
+public class BasicTest extends TestBase {
 	
 	@Test
 	public void ParseBasicFile() throws Exception {
@@ -58,12 +58,7 @@ public class BasicTest {
 		
 		
 		//build the node map
-		HashMap<String, Long> nodeNameId = new HashMap<String, Long>();
-		CyTable cyNodeTable = cyNetwork.getDefaultNodeTable();
-		List<CyRow> cyNodeRows = cyNodeTable.getAllRows();
-		for(CyRow cyNodeRow : cyNodeRows) {
-			nodeNameId.put(cyNodeRow.get("name", String.class), cyNodeRow.get("SUID", Long.class));
-		}
+		HashMap<String, Long> nodeNameId = BuildNodeMap(cyNetwork);
 		
 		//check the nodes
 		assertEquals(true, nodeNameId.containsKey("Hello"));
@@ -80,23 +75,5 @@ public class BasicTest {
 		for(CyEdge cyEdge : cyEdges) {
 			assertEquals(true, edgeMapping.get(cyEdge.getSource().getSUID()).contains(cyEdge.getTarget().getSUID()));
 		}
-	}
-	
-	private CyNetwork[] RunFile(InputStream stream) throws Exception {
-		CyNetworkFactory cyNetworkFactory = new NetworkTestSupport().getNetworkFactory();
-		CyNetworkViewFactory cyNetworkViewFactory = new NetworkViewTestSupport().getNetworkViewFactory();
-		CyNetworkManager cyNetworkManager = new NetworkTestSupport().getNetworkManager();
-		CyRootNetworkManager cyRootNetworkManager = new NetworkTestSupport().getRootNetworkFactory();
-		
-		CyNetworkReader reader = new GEXFNetworkReader(stream, cyNetworkViewFactory, cyNetworkFactory, cyNetworkManager, cyRootNetworkManager);
-		
-		TaskMonitor monitor = mock(TaskMonitor.class);
-		
-		reader.run(monitor);
-		stream.close();
-		
-		CyNetwork[] cyNetworks = reader.getNetworks();
-		
-		return cyNetworks;
 	}
 }
