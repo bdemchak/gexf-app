@@ -1,8 +1,10 @@
 package edu.umuc.swen670.gexf.internal.io;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
 import java.io.InputStream;
+import java.io.InvalidClassException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -49,6 +51,41 @@ public class TestBase {
 		}
 		
 		return nodeNameId;
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	protected void ValidateNodeAttributes(CyNetwork cyNetwork, Long SUID, String[] attributeNames, Class[] attributeTypes, Object[] attributeValues) throws InvalidClassException {
+		CyTable cyNodeTable = cyNetwork.getDefaultNodeTable();
+		
+		CyRow cyRow = cyNodeTable.getRow(SUID);
+		
+		for (int i=0; i<attributeNames.length; i++) {
+			Object value = cyRow.get(attributeNames[i], attributeTypes[i]);
+			
+			GenericCompare(value, attributeValues[i], attributeTypes[i]);
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected <T> void GenericCompare(Object value1, Object value2, Class<T> type) throws InvalidClassException {
+		if(type.equals(Integer.class)) {
+			assertEquals((T)value1, (T)value2);
+		}
+		else if(type.equals(Long.class)) {
+			assertEquals((T)value1, (T)value2);
+		}
+		else if(type.equals(Double.class)) {
+			assertEquals((Double)value1, (Double)value2, (Double)0.0001);
+		}
+		else if(type.equals(Boolean.class)) {
+			assertEquals((T)value1, (T)value2);
+		}
+		else if(type.equals(String.class)) {
+			assertEquals((T)value1, (T)value2);
+		}
+		else {
+			throw new InvalidClassException(type.getName());
+		}
 	}
 
 }

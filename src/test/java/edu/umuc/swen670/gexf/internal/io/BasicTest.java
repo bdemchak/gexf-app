@@ -36,12 +36,11 @@ import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.work.TaskMonitor;
 
-
 public class BasicTest extends TestBase {
 	
 	@Test
 	public void ParseBasicFile() throws Exception {
-		InputStream stream = this.getClass().getClassLoader().getResourceAsStream("testData/gexf/basic.gexf");
+		InputStream stream = this.getClass().getClassLoader().getResourceAsStream("testData/gexf/basic12.gexf");
 		assertNotNull(stream);
 		
 		CyNetwork[] cyNetworks = RunFile(stream);
