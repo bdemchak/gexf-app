@@ -21,6 +21,8 @@ import org.cytoscape.model.subnetwork.CyRootNetworkManager;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.work.TaskMonitor;
 
+import edu.umuc.swen670.gexf.internal.model.GEXFMeta;
+
 public class TestBase {
 
 	protected CyNetwork[] RunFile(InputStream stream) throws Exception {
@@ -86,6 +88,27 @@ public class TestBase {
 		}
 		else {
 			throw new InvalidClassException(type.getName());
+		}
+	}
+	
+	protected void CheckMeta(CyNetwork cyNetwork, String lastmodifieddate, String creator, String keywords, String description) {
+		CyTable cyTable = cyNetwork.getDefaultNetworkTable();
+		CyRow cyRow = cyTable.getRow(cyNetwork.getSUID());
+		
+		if(lastmodifieddate.length()!=0) {
+			assertEquals(lastmodifieddate, cyRow.get(GEXFMeta.LASTMODIFIEDDATE, String.class));
+		}
+		
+		if(creator.length()!=0) {
+			assertEquals(creator, cyRow.get(GEXFMeta.CREATOR, String.class));
+		}
+		
+		if(keywords.length()!=0) {
+			assertEquals(keywords, cyRow.get(GEXFMeta.KEYWORDS, String.class));
+		}
+		
+		if(description.length()!=0) {
+			assertEquals(description, cyRow.get(GEXFMeta.DESCRIPTION, String.class));
 		}
 	}
 	
