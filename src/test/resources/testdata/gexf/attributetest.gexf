@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gexf xmlns="http://www.gexf.net/1.2draft" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.gexf.net/1.2draft http://www.gexf.net/1.2draft/gexf.xsd" version="1.2">
+  <meta lastmodifieddate="2016-03-09">
+    <creator>Gephi.org</creator>
+    <description>Attribute Test</description>
+  </meta>
+  <graph defaultedgetype="directed">
+    <attributes class="node">
+	  <attribute id="0" title="integer-test" type="integer"/>
+      <attribute id="1" title="float-test" type="float"/>
+      <attribute id="2" title="boolean-test" type="boolean">
+		<default>true</default>
+      </attribute>
+	</attributes>
+	<attributes class="edge">
+	   <attribute id="0" title="edge-float-test" type="float"/>
+	   <default>2</default>
+    </attributes>
+    <nodes>
+      <node id="0" label="NodeOne">
+        <attvalues>
+		  <attvalue for="0" value="5"/>
+          <attvalue for="1" value="3.0"/>
+        </attvalues>
+      </node>
+      <node id="1" label="NodeTwo">
+        <attvalues>
+		  <attvalue for="0" value="10"/>
+          <attvalue for="1" value="2.0"/>
+        </attvalues>
+      </node>
+	</nodes>
+    <edges>
+      <edge id="0" source="0" target="1"/>
+	</edges>
+  </graph>
+</gexf>
