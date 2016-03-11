@@ -62,9 +62,12 @@ public class DataTest extends TestBase {
 		
 		
 		//check the node attributes
-		ValidateNodeAttributes(cyNetwork, nodeNameId.get("Gephi"), new String[]{"url", "indegree"}, new Class[] {String.class, Double.class}, new Object[] {"http://gephi.org", 1.0});
-		ValidateNodeAttributes(cyNetwork, nodeNameId.get("Webatlas"), new String[]{"url", "indegree"}, new Class[] {String.class, Double.class}, new Object[] {"http://webatlas.fr", 2.0});
-		ValidateNodeAttributes(cyNetwork, nodeNameId.get("RTGI"), new String[]{"url", "indegree"}, new Class[] {String.class, Double.class}, new Object[] {"http://rtgi.fr", 1.0});
+		String[] names = new String[]{"url", "indegree"};
+		Class[] types = new Class[] {String.class, Double.class};
+		
+		ValidateNodeAttributes(cyNetwork, nodeNameId.get("Gephi"), names, types, new Object[] {"http://gephi.org", 1.0});
+		ValidateNodeAttributes(cyNetwork, nodeNameId.get("Webatlas"), names, types, new Object[] {"http://webatlas.fr", 2.0});
+		ValidateNodeAttributes(cyNetwork, nodeNameId.get("RTGI"), names, types, new Object[] {"http://rtgi.fr", 1.0});
 		ValidateNodeAttributes(cyNetwork, nodeNameId.get("BarabasiLab"), new String[]{"url", "indegree", "frog"}, new Class[] {String.class, Double.class, Boolean.class}, new Object[] {"http://barabasilab.com", 1.0, false});
 	}
 
