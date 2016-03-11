@@ -67,12 +67,11 @@ public class BasicTest extends TestBase {
 		
 		//build the edge map
 		HashMap<Long, List<Long>> edgeMapping = new HashMap<Long, List<Long>>();
-		edgeMapping.put(nodeNameId.get("Hello"), Arrays.asList(nodeNameId.get("World")));
+		edgeMapping.put(nodeNameId.get("Hello"), new ArrayList(Arrays.asList(nodeNameId.get("World"))));
 		
-		//check the edges
-		List<CyEdge> cyEdges = cyNetwork.getEdgeList();
-		for(CyEdge cyEdge : cyEdges) {
-			assertEquals(true, edgeMapping.get(cyEdge.getSource().getSUID()).contains(cyEdge.getTarget().getSUID()));
-		}
+		HashMap<String, List<Boolean>> edgeMappingDirected = new HashMap<String, List<Boolean>>();
+		edgeMappingDirected.put(nodeNameId.get("Hello").toString() + "," + nodeNameId.get("World"), new ArrayList(Arrays.asList(true)));
+		
+		CheckEdges(cyNetwork, edgeMapping, edgeMappingDirected);
 	}
 }

@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.cytoscape.ding.NetworkViewTestSupport;
 import org.cytoscape.io.read.CyNetworkReader;
+import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
@@ -85,6 +86,29 @@ public class TestBase {
 		}
 		else {
 			throw new InvalidClassException(type.getName());
+		}
+	}
+	
+	protected void CheckEdges(CyNetwork cyNetwork, HashMap<Long, List<Long>> edgeMapping, HashMap<String, List<Boolean>> edgeMappingDirected) {
+		//check the edges
+		List<CyEdge> cyEdges = cyNetwork.getEdgeList();
+		for(CyEdge cyEdge : cyEdges) {
+			assertEquals(true, edgeMapping.get(cyEdge.getSource().getSUID()).contains(cyEdge.getTarget().getSUID()));
+			assertEquals(true, edgeMappingDirected.get(cyEdge.getSource().getSUID().toString() + "," + cyEdge.getTarget().getSUID().toString()).contains(cyEdge.isDirected()));
+			
+			//remove the items from the arrays in case there is duplication
+			assertEquals(true, edgeMapping.get(cyEdge.getSource().getSUID()).remove(cyEdge.getTarget().getSUID()));
+			assertEquals(true, edgeMappingDirected.get(cyEdge.getSource().getSUID() + "," + cyEdge.getTarget().getSUID()).remove(cyEdge.isDirected()));
+		}
+		
+		//check that the arrays in the maps are now empty
+		ValidateEmptyHashValueArray(edgeMapping);
+		ValidateEmptyHashValueArray(edgeMappingDirected);
+	}
+	
+	protected <T,U> void ValidateEmptyHashValueArray(HashMap<T, List<U>> map) {
+		for(T key : map.keySet()) {
+			assertEquals(0, map.get(key).size());
 		}
 	}
 

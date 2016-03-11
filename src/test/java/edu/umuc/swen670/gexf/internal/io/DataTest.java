@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -45,15 +46,18 @@ public class DataTest extends TestBase {
 		
 		//build the edge map
 		HashMap<Long, List<Long>> edgeMapping = new HashMap<Long, List<Long>>();
-		edgeMapping.put(nodeNameId.get("Gephi"), Arrays.asList(nodeNameId.get("Webatlas"), nodeNameId.get("RTGI"), nodeNameId.get("BarabasiLab")));
-		edgeMapping.put(nodeNameId.get("Webatlas"), Arrays.asList(nodeNameId.get("Gephi")));
-		edgeMapping.put(nodeNameId.get("RTGI"), Arrays.asList(nodeNameId.get("Webatlas")));
+		edgeMapping.put(nodeNameId.get("Gephi"), new ArrayList(Arrays.asList(nodeNameId.get("Webatlas"), nodeNameId.get("RTGI"), nodeNameId.get("BarabasiLab"))));
+		edgeMapping.put(nodeNameId.get("Webatlas"), new ArrayList(Arrays.asList(nodeNameId.get("Gephi"))));
+		edgeMapping.put(nodeNameId.get("RTGI"), new ArrayList(Arrays.asList(nodeNameId.get("Webatlas"))));
 		
-		//check the edges
-		List<CyEdge> cyEdges = cyNetwork.getEdgeList();
-		for(CyEdge cyEdge : cyEdges) {
-			assertEquals(true, edgeMapping.get(cyEdge.getSource().getSUID()).contains(cyEdge.getTarget().getSUID()));
-		}
+		HashMap<String, List<Boolean>> edgeMappingDirected = new HashMap<String, List<Boolean>>();
+		edgeMappingDirected.put(nodeNameId.get("Gephi").toString() + "," + nodeNameId.get("Webatlas"), new ArrayList(Arrays.asList(true)));
+		edgeMappingDirected.put(nodeNameId.get("Gephi").toString() + "," + nodeNameId.get("RTGI"), new ArrayList(Arrays.asList(true)));
+		edgeMappingDirected.put(nodeNameId.get("Gephi").toString() + "," + nodeNameId.get("BarabasiLab"), new ArrayList(Arrays.asList(true)));
+		edgeMappingDirected.put(nodeNameId.get("Webatlas").toString() + "," + nodeNameId.get("Gephi"), new ArrayList(Arrays.asList(true)));
+		edgeMappingDirected.put(nodeNameId.get("RTGI").toString() + "," + nodeNameId.get("Webatlas"), new ArrayList(Arrays.asList(true)));
+		
+		CheckEdges(cyNetwork, edgeMapping, edgeMappingDirected);
 		
 		
 		
