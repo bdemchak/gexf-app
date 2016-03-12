@@ -53,6 +53,7 @@ public class GEXF12Parser extends GEXFParserBase {
 		
 		_attEdgeMapping = ParseAttributeHeader("edge");
 		_cyNetwork.getDefaultEdgeTable().createColumn(GEXFEdge.EDGETYPE, String.class, true);
+		_cyNetwork.getDefaultEdgeTable().createColumn(GEXFEdge.WEIGHT, Double.class, true);
 
 
 		expression = "/gexf/graph/nodes/node";

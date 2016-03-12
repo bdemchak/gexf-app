@@ -182,6 +182,7 @@ abstract class GEXFParserBase {
 				String xSource = xElem.getAttribute(GEXFEdge.SOURCE).trim();
 				String xTarget = xElem.getAttribute(GEXFEdge.TARGET).trim();
 				String xEdgeType = xElem.hasAttribute(GEXFEdge.EDGETYPE) ? xElem.getAttribute(GEXFEdge.EDGETYPE).trim() : defaultEdgeType;
+				String xEdgeWeight = xElem.hasAttribute(GEXFEdge.WEIGHT) ? xElem.getAttribute(GEXFEdge.WEIGHT).trim() : "";
 				
 
 				CyEdge cyEdge = _cyNetwork.addEdge(_cyNetwork.getNode(_idMapping.get(xSource)), _cyNetwork.getNode(_idMapping.get(xTarget)), IsDirected(xEdgeType));
@@ -190,6 +191,11 @@ abstract class GEXFParserBase {
 				if(xElem.hasAttribute(GEXFEdge.EDGETYPE)) {
 					_cyNetwork.getRow(cyEdge).set(GEXFEdge.EDGETYPE, xEdgeType);
 					if(cyEdgeReverse!=null) _cyNetwork.getRow(cyEdgeReverse).set(GEXFEdge.EDGETYPE, xEdgeType);
+				}
+				
+				if(xElem.hasAttribute(GEXFEdge.WEIGHT)) {
+					_cyNetwork.getRow(cyEdge).set(GEXFEdge.WEIGHT, Double.parseDouble(xEdgeWeight));
+					if(cyEdgeReverse!=null) _cyNetwork.getRow(cyEdgeReverse).set(GEXFEdge.WEIGHT, Double.parseDouble(xEdgeWeight));
 				}
 				
 				if(xNode.hasChildNodes()) {
