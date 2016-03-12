@@ -381,4 +381,49 @@ public class EdgeTypeTest extends TestBase {
 		
 		ValidateEdgeAttributes(cyNetwork, nodeNameId.get("Hello"), nodeNameId.get("World"), names, types, new Object[] {"simple"});
 	}
+	
+	@Test
+	public void ParseEdgeTypeUndirectedFile() throws Exception {
+		InputStream stream = this.getClass().getClassLoader().getResourceAsStream("testData/gexf/edgetypeundirected.gexf");
+		assertNotNull(stream);
+		
+		CyNetwork[] cyNetworks = RunFile(stream);
+		
+		assertNotNull(cyNetworks);
+		assertEquals(1, cyNetworks.length);
+		
+		CyNetwork cyNetwork = cyNetworks[0];
+		
+		
+		//check the counts
+		assertEquals(2, cyNetwork.getNodeCount());
+		assertEquals(1, cyNetwork.getEdgeCount());
+		
+		
+		
+		//build the node map
+		HashMap<String, Long> nodeNameId = BuildNodeMap(cyNetwork);
+		
+		//check the nodes
+		assertEquals(true, nodeNameId.containsKey("Hello"));
+		assertEquals(true, nodeNameId.containsKey("World"));
+		
+		
+		//build the edge map
+		HashMap<Long, List<Long>> edgeMapping = new HashMap<Long, List<Long>>();
+		edgeMapping.put(nodeNameId.get("Hello"), new ArrayList(Arrays.asList(nodeNameId.get("World"))));
+		
+		HashMap<String, List<Boolean>> edgeMappingDirected = new HashMap<String, List<Boolean>>();
+		edgeMappingDirected.put(nodeNameId.get("Hello").toString() + "," + nodeNameId.get("World").toString(), new ArrayList(Arrays.asList(false)));
+		
+		
+		CheckEdges(cyNetwork, edgeMapping, edgeMappingDirected);
+		
+		
+		//check the edge attributes
+		String[] names = new String[]{"type"};
+		Class[] types = new Class[] {String.class};
+		
+		ValidateEdgeAttributes(cyNetwork, nodeNameId.get("Hello"), nodeNameId.get("World"), names, types, new Object[] {"undirected"});
+	}
 }
