@@ -56,11 +56,28 @@ public class TestBase {
 		return nodeNameId;
 	}
 	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings("rawtypes")
 	protected void ValidateNodeAttributes(CyNetwork cyNetwork, Long SUID, String[] attributeNames, Class[] attributeTypes, Object[] attributeValues) throws InvalidClassException {
 		CyTable cyNodeTable = cyNetwork.getDefaultNodeTable();
 		
-		CyRow cyRow = cyNodeTable.getRow(SUID);
+		ValidateAttributes(cyNodeTable, SUID, attributeNames, attributeTypes, attributeValues);
+	}
+	
+	@SuppressWarnings("rawtypes")
+	protected void ValidateEdgeAttributes(CyNetwork cyNetwork, Long sourceSUID, Long targetSUID, String[] attributeNames, Class[] attributeTypes, Object[] attributeValues) throws InvalidClassException {
+		List<CyEdge> cyEdges = cyNetwork.getEdgeList();
+		for(CyEdge cyEdge : cyEdges) {
+			if(cyEdge.getSource().getSUID()==sourceSUID && cyEdge.getTarget().getSUID()==targetSUID) {
+				CyTable cyEdgeTable = cyNetwork.getDefaultEdgeTable();
+				
+				ValidateAttributes(cyEdgeTable, cyEdge.getSUID(), attributeNames, attributeTypes, attributeValues);
+			}
+		}
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private void ValidateAttributes(CyTable cyTable, Long SUID, String[] attributeNames, Class[] attributeTypes, Object[] attributeValues) throws InvalidClassException {
+		CyRow cyRow = cyTable.getRow(SUID);
 		
 		for (int i=0; i<attributeNames.length; i++) {
 			Object value = cyRow.get(attributeNames[i], attributeTypes[i]);
