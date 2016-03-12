@@ -243,4 +243,52 @@ public class EdgeTypeTest extends TestBase {
 		ValidateEdgeAttributes(cyNetwork, nodeNameId.get("Hello"), nodeNameId.get("World"), names, types, new Object[] {"double"});
 		ValidateEdgeAttributes(cyNetwork, nodeNameId.get("World"), nodeNameId.get("Hello"), names, types, new Object[] {"double"});
 	}
+	
+	@Test
+	public void ParseEdgeTypeMutualFile() throws Exception {
+		InputStream stream = this.getClass().getClassLoader().getResourceAsStream("testData/gexf/edgetypemutual.gexf");
+		assertNotNull(stream);
+		
+		CyNetwork[] cyNetworks = RunFile(stream);
+		
+		assertNotNull(cyNetworks);
+		assertEquals(1, cyNetworks.length);
+		
+		CyNetwork cyNetwork = cyNetworks[0];
+		
+		
+		//check the counts
+		assertEquals(2, cyNetwork.getNodeCount());
+		assertEquals(2, cyNetwork.getEdgeCount());
+		
+		
+		
+		//build the node map
+		HashMap<String, Long> nodeNameId = BuildNodeMap(cyNetwork);
+		
+		//check the nodes
+		assertEquals(true, nodeNameId.containsKey("Hello"));
+		assertEquals(true, nodeNameId.containsKey("World"));
+		
+		
+		//build the edge map
+		HashMap<Long, List<Long>> edgeMapping = new HashMap<Long, List<Long>>();
+		edgeMapping.put(nodeNameId.get("Hello"), new ArrayList(Arrays.asList(nodeNameId.get("World"))));
+		edgeMapping.put(nodeNameId.get("World"), new ArrayList(Arrays.asList(nodeNameId.get("Hello"))));
+		
+		HashMap<String, List<Boolean>> edgeMappingDirected = new HashMap<String, List<Boolean>>();
+		edgeMappingDirected.put(nodeNameId.get("Hello").toString() + "," + nodeNameId.get("World").toString(), new ArrayList(Arrays.asList(true)));
+		edgeMappingDirected.put(nodeNameId.get("World").toString() + "," + nodeNameId.get("Hello").toString(), new ArrayList(Arrays.asList(true)));
+		
+		
+		CheckEdges(cyNetwork, edgeMapping, edgeMappingDirected);
+		
+		
+		//check the edge attributes
+		String[] names = new String[]{"type"};
+		Class[] types = new Class[] {String.class};
+		
+		ValidateEdgeAttributes(cyNetwork, nodeNameId.get("Hello"), nodeNameId.get("World"), names, types, new Object[] {"mutual"});
+		ValidateEdgeAttributes(cyNetwork, nodeNameId.get("World"), nodeNameId.get("Hello"), names, types, new Object[] {"mutual"});
+	}
 }
