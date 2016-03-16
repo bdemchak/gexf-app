@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
@@ -20,14 +23,23 @@ import org.xml.sax.SAXException;
 
 public class GEXF13Parser extends GEXFParserBase {
 
-	public GEXF13Parser(Document doc, CyNetwork cyNetwork, String version) {
-		super(doc, cyNetwork, version);
+	public GEXF13Parser(Document doc, XMLStreamReader xmlReader, CyNetwork cyNetwork, String version) {
+		super(doc, xmlReader, cyNetwork, version);
 	}
 
 	@Override
-	public void ParseStream() throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-		
-		ParseMeta();
+	public void ParseStream() throws XPathExpressionException, ParserConfigurationException, SAXException, IOException, XMLStreamException {
+		while(_xmlReader.hasNext()) {
+			int event = _xmlReader.next();
+
+			switch(event) {
+			case XMLStreamConstants.START_ELEMENT :
+				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFMeta.META)) {
+					ParseMeta();
+					break;
+				}
+			}
+		}
 		
 		XPath xPath =  XPathFactory.newInstance().newXPath();
 		

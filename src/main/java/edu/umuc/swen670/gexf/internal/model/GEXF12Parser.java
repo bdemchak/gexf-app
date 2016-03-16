@@ -10,6 +10,9 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
@@ -30,14 +33,24 @@ import edu.umuc.swen670.gexf.internal.io.GEXFFileFilter;
 
 public class GEXF12Parser extends GEXFParserBase {
 	
-	public GEXF12Parser(Document doc, CyNetwork cyNetwork, String version) {
-		super(doc, cyNetwork, version);
+	public GEXF12Parser(Document doc, XMLStreamReader xmlReader, CyNetwork cyNetwork, String version) {
+		super(doc, xmlReader, cyNetwork, version);
 	}
 	
 	@Override
-	public void ParseStream() throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-	
-		ParseMeta();
+	public void ParseStream() throws XPathExpressionException, ParserConfigurationException, SAXException, IOException, XMLStreamException {
+		while(_xmlReader.hasNext()) {
+			int event = _xmlReader.next();
+
+			switch(event) {
+			case XMLStreamConstants.START_ELEMENT :
+				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFMeta.META)) {
+					ParseMeta();
+					break;
+				}
+			}
+		}
+
 		
 		XPath xPath =  XPathFactory.newInstance().newXPath();
 		

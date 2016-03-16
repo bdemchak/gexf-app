@@ -2,10 +2,14 @@ package edu.umuc.swen670.gexf.internal.model;
 
 import java.io.IOException;
 import java.io.InvalidClassException;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
@@ -26,6 +30,7 @@ import org.xml.sax.SAXException;
 abstract class GEXFParserBase {
 
 	protected Document _doc = null;
+	protected XMLStreamReader _xmlReader = null;
 	protected CyNetwork _cyNetwork = null;
 	protected String _version = "";
 	
@@ -33,53 +38,51 @@ abstract class GEXFParserBase {
 	AttributeMapping _attNodeMapping = null;
 	AttributeMapping _attEdgeMapping = null;
 	
-	public GEXFParserBase(Document doc, CyNetwork cyNetwork, String version) {
+	public GEXFParserBase(Document doc, XMLStreamReader xmlReader, CyNetwork cyNetwork, String version) {
 		_doc = doc;
+		_xmlReader = xmlReader;
 		_cyNetwork = cyNetwork;
 		_version = version;
 	}
 	
-	public abstract void ParseStream() throws XPathExpressionException, ParserConfigurationException, SAXException, IOException;
+	public abstract void ParseStream() throws XPathExpressionException, ParserConfigurationException, SAXException, IOException, XMLStreamException;
 	
-	protected void ParseMeta() throws XPathExpressionException, InvalidClassException {
-		XPath xPath = XPathFactory.newInstance().newXPath();
-		String expression = "/gexf/meta";
-		NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(_doc, XPathConstants.NODESET);
-		
-		if(nodeList.getLength() == 1) {
-			Node metaNode = nodeList.item(0);
-			
-			CyTable cyTable = _cyNetwork.getDefaultNetworkTable();
-			CyRow cyRow = cyTable.getRow(_cyNetwork.getSUID());
-			
-			Element metaElement = (Element) metaNode;
-			if(metaElement.hasAttribute(GEXFMeta.LASTMODIFIEDDATE)) {
-				cyTable.createColumn(GEXFMeta.LASTMODIFIEDDATE, String.class, false);
+	protected void ParseMeta() throws XPathExpressionException, InvalidClassException, XMLStreamException {
+		CyTable cyTable = _cyNetwork.getDefaultNetworkTable();
+		CyRow cyRow = cyTable.getRow(_cyNetwork.getSUID());
 				
-				cyRow.set(GEXFMeta.LASTMODIFIEDDATE, metaElement.getAttribute(GEXFMeta.LASTMODIFIEDDATE).trim());
-			}
-			
-			if(metaNode.hasChildNodes()) {
-				NodeList childNodes = metaNode.getChildNodes();
-				for(int i=0; i<childNodes.getLength(); i++) {
-					Node childNode = childNodes.item(i);
-					
-					//skip TEXT_NODE items
-					if(childNode.getNodeType() != Node.ELEMENT_NODE) continue;
-					
-					if(childNode.getNodeName().trim().equalsIgnoreCase(GEXFMeta.CREATOR) || 
-							childNode.getNodeName().trim().equalsIgnoreCase(GEXFMeta.KEYWORDS) || 
-							childNode.getNodeName().trim().equalsIgnoreCase(GEXFMeta.DESCRIPTION)) {
-						cyTable.createColumn(childNode.getNodeName().trim().toLowerCase(), String.class, false);
-						
-						cyRow.set(childNode.getNodeName().trim().toLowerCase(), childNode.getTextContent().trim());
-					}
-					else {
-						throw new InvalidClassException(childNode.getNodeName().trim());
-					}
+		List<String> attributes = GetElementAttributes();
+		if(attributes.contains(GEXFMeta.LASTMODIFIEDDATE)) {
+			cyTable.createColumn(GEXFMeta.LASTMODIFIEDDATE, String.class, false);
+			cyRow.set(GEXFMeta.LASTMODIFIEDDATE, _xmlReader.getAttributeValue(null, GEXFMeta.LASTMODIFIEDDATE).trim());
+		}
+		
+		String tagContent = null;
+		
+		while(_xmlReader.hasNext()) {
+			int event = _xmlReader.next();
+
+			switch(event) {
+			case XMLStreamConstants.END_ELEMENT :
+				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFMeta.META)) {
+					return;
 				}
+				else if(_xmlReader.getLocalName().trim().equalsIgnoreCase(GEXFMeta.CREATOR) || 
+						_xmlReader.getLocalName().equalsIgnoreCase(GEXFMeta.DESCRIPTION) || 
+						_xmlReader.getLocalName().equalsIgnoreCase(GEXFMeta.KEYWORDS)) {
+					
+					cyTable.createColumn(_xmlReader.getLocalName().trim().toLowerCase(), String.class, false);
+					cyRow.set(_xmlReader.getLocalName().trim().toLowerCase(), tagContent.trim());
+					
+					break;
+				}
+				else {
+					throw new InvalidClassException(_xmlReader.getLocalName().trim());
+				}
+			case XMLStreamConstants.CHARACTERS :
+				tagContent = _xmlReader.getText();
+				break;
 			}
-			
 		}
 	}
 	
@@ -295,6 +298,17 @@ abstract class GEXFParserBase {
 		else {
 			throw new InvalidClassException(type);
 		}
+	}
+	
+	protected List<String> GetElementAttributes() {
+		List<String> attributes = new ArrayList<String>();
+		
+		int count = _xmlReader.getAttributeCount();
+		for(int i=0; i<count; i++) {
+			attributes.add(_xmlReader.getAttributeLocalName(i));
+		}
+		
+		return attributes;
 	}
 	
 	protected abstract Boolean IsDirected(String direction);

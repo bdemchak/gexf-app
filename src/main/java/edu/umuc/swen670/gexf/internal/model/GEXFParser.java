@@ -31,14 +31,14 @@ public class GEXFParser {
 		
 		String version = "";
 		
-		while(xmlReader.hasNext()) {
+		loop: while(xmlReader.hasNext()) {
 			int event = xmlReader.next();
 
 			switch(event) {
 			case XMLStreamConstants.START_ELEMENT :
 				if(xmlReader.getLocalName().equalsIgnoreCase("gexf")) {
 					version = xmlReader.getAttributeValue(null, "version").trim();
-					break;
+					break loop;
 				}
 			}
 		}
@@ -57,20 +57,20 @@ public class GEXFParser {
 		GEXFParserBase parser = null;
 		
 		if(version.startsWith(GEXFGraph.VERSION0) || version.equalsIgnoreCase(GEXFGraph.VERSION10)) {
-			parser = new GEXF10Parser(doc, cyNetwork, version);
+			parser = new GEXF10Parser(doc, xmlReader, cyNetwork, version);
 		}
 		else if(version.equalsIgnoreCase(GEXFGraph.VERSION11)) {
-			parser = new GEXF12Parser(doc, cyNetwork, version);
+			parser = new GEXF12Parser(doc, xmlReader, cyNetwork, version);
 		}
 		else if(version.equalsIgnoreCase(GEXFGraph.VERSION12)) {
-			parser = new GEXF12Parser(doc, cyNetwork, version);
+			parser = new GEXF12Parser(doc, xmlReader, cyNetwork, version);
 		}
 		else if(version.equalsIgnoreCase(GEXFGraph.VERSION13)) {
-			parser = new GEXF13Parser(doc, cyNetwork, version);
+			parser = new GEXF13Parser(doc, xmlReader, cyNetwork, version);
 		}
 		else {
 			//try to parse with the latest supported version
-			parser = new GEXF13Parser(doc, cyNetwork, version);
+			parser = new GEXF13Parser(doc, xmlReader, cyNetwork, version);
 		}
 
 		parser.ParseStream();
