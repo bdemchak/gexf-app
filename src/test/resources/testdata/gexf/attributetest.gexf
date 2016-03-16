@@ -13,8 +13,9 @@
       </attribute>
 	</attributes>
 	<attributes class="edge">
-	   <attribute id="0" title="edge-float-test" type="float"/>
-	   <default>2</default>
+	   <attribute id="0" title="edge-float-test" type="float">
+	   	<default>2</default>
+	   </attribute>
     </attributes>
     <nodes>
       <node id="0" label="NodeOne">

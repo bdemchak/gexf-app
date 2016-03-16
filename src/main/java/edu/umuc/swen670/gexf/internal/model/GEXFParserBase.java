@@ -87,68 +87,86 @@ abstract class GEXFParserBase {
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	protected AttributeMapping ParseAttributeHeader(String attributeClass) throws XPathExpressionException, IOException {
+	protected AttributeMapping ParseAttributeHeader(String attributeClass) throws IOException, XMLStreamException {
 		AttributeMapping attMapping = new AttributeMapping();
 
 		CyTable cyTable;
-		if(attributeClass.equalsIgnoreCase("node")) {
+		if(attributeClass.equalsIgnoreCase(GEXFAttribute.NODE)) {
 			cyTable = _cyNetwork.getDefaultNodeTable();
-		} else if(attributeClass.equalsIgnoreCase("edge")) {
+		} else if(attributeClass.equalsIgnoreCase(GEXFAttribute.EDGE)) {
 			cyTable = _cyNetwork.getDefaultEdgeTable();
 		} else {
 			throw new InvalidClassException(attributeClass);
 		}
 		
+		String xId = null;
+		String xTitle = null;
+		String xType = null;
+		
+		String xDefault = null;
+		Boolean hasDefault = false;
+		
+		while(_xmlReader.hasNext()) {
+			int event = _xmlReader.next();
 
-		XPath xPath =  XPathFactory.newInstance().newXPath();
-		String expression = "/gexf/graph/attributes[@class='" + attributeClass +"']/attribute";
-		NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(_doc, XPathConstants.NODESET);
-		for (int i = 0; i < nodeList.getLength(); i++) {
-			Node xNode = nodeList.item(i);
-
-			if (xNode.getNodeType() == Node.ELEMENT_NODE) {
-				Element xElem = (Element) xNode;
-
-				String xId = xElem.getAttribute(GEXFAttribute.ID).trim();
-				String xTitle = xElem.getAttribute(GEXFAttribute.TITLE).trim();
-				String xType = xElem.getAttribute(GEXFAttribute.TYPE).trim();
-				String xDefault = null;
-
-				if(xNode.hasChildNodes()) {
-					NodeList childNodes = xNode.getChildNodes();
-					for(int j=0; j< childNodes.getLength(); j++) {
-						Node childNode = childNodes.item(j);
-						if(childNode.getNodeName().equalsIgnoreCase(GEXFAttribute.DEFAULT)) {
-							xDefault = childNode.getTextContent().trim();
+			switch(event) {
+			case XMLStreamConstants.START_ELEMENT :
+				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFAttribute.ATTRIBUTE)) {
+					xId = _xmlReader.getAttributeValue(null, GEXFAttribute.ID).trim();
+					xTitle = _xmlReader.getAttributeValue(null, GEXFAttribute.TITLE).trim();
+					xType =_xmlReader.getAttributeValue(null, GEXFAttribute.TYPE).trim();
+				}
+				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFAttribute.DEFAULT)) {
+					hasDefault = true;
+				}
+				break;
+			case XMLStreamConstants.CHARACTERS :
+				if(hasDefault && xDefault == null) {
+					xDefault = _xmlReader.getText().trim();
+				}
+				break;
+			case XMLStreamConstants.END_ELEMENT :
+				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFAttribute.ATTRIBUTES)) {
+					return attMapping;
+				}
+				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFAttribute.ATTRIBUTE)) {
+					Class type = GetClass(xType);
+					
+					if(!hasDefault) {
+						if(!type.isArray()) {
+							cyTable.createColumn(xTitle, type, false);
+						}
+						else {
+							cyTable.createListColumn(xTitle, type.getComponentType(), false);
 						}
 					}
-				}
-				
-				Class type = GetClass(xType);
-
-				if(xDefault == null || xDefault.length() == 0) {
-					if(!type.isArray()) {
-						cyTable.createColumn(xTitle, type, false);
-					}
 					else {
-						cyTable.createListColumn(xTitle, type.getComponentType(), false);
+						if(!type.isArray()) {
+							cyTable.createColumn(xTitle, type, false, GenericParse(xDefault, type));
+						}
+						else {
+							cyTable.createListColumn(xTitle, type.getComponentType(), false, ParseArray(xDefault, type.getComponentType()));
+						}
 					}
+					
+					attMapping.Id.put(xId, xTitle);
+					attMapping.Type.put(xId, xType);
+					
+					
+					
+					//reset the storage
+					xId = null;
+					xTitle = null;
+					xType = null;
+					
+					hasDefault = false;
+					xDefault = null;
 				}
-				else {
-					if(!type.isArray()) {
-						cyTable.createColumn(xTitle, type, false, GenericParse(xDefault, type));
-					}
-					else {
-						cyTable.createListColumn(xTitle, type.getComponentType(), false, ParseArray(xDefault, type.getComponentType()));
-					}
-				}
-
-				attMapping.Id.put(xId, xTitle);
-				attMapping.Type.put(xId, xType);
+				break;
 			}
 		}
-
-		return attMapping;
+		
+		throw new InvalidClassException("Missing AttributeHeader tags");
 	}
 	
 	protected void ParseNode(Node xNode, String expression) throws XPathExpressionException, IOException {

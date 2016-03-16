@@ -1,6 +1,7 @@
 package edu.umuc.swen670.gexf.internal.model;
 
 import java.io.IOException;
+import java.io.InvalidClassException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,12 +49,21 @@ public class GEXF13Parser extends GEXFParserBase {
 					defaultEdgeType = graphAttributes.contains(GEXFGraph.DEFAULTEDGETYPE) ? _xmlReader.getAttributeValue(null, GEXFGraph.DEFAULTEDGETYPE).trim() : EdgeTypes.UNDIRECTED;
 					mode = graphAttributes.contains(GEXFGraph.MODE) ? _xmlReader.getAttributeValue(null, GEXFGraph.MODE).trim() : GEXFGraph.STATIC;
 				}
+				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFAttribute.ATTRIBUTES)) {
+					String attributeClass = _xmlReader.getAttributeValue(null, GEXFAttribute.CLASS).trim();
+					if(attributeClass.equalsIgnoreCase(GEXFAttribute.NODE)) {
+						_attNodeMapping = ParseAttributeHeader(GEXFAttribute.NODE);
+					}
+					else if (attributeClass.equalsIgnoreCase(GEXFAttribute.EDGE)) {
+						_attEdgeMapping = ParseAttributeHeader(GEXFAttribute.EDGE);
+					}
+					else {
+						throw new InvalidClassException(attributeClass);
+					}
+				}
 			}
 		}
 
-		_attNodeMapping = ParseAttributeHeader("node");
-		
-		_attEdgeMapping = ParseAttributeHeader("edge");
 		_cyNetwork.getDefaultEdgeTable().createColumn(GEXFEdge.EDGETYPE, String.class, true);
 		_cyNetwork.getDefaultEdgeTable().createColumn(GEXFEdge.WEIGHT, Double.class, true);
 
