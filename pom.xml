@@ -5,6 +5,7 @@
 		<cytoscape.api.version>3.1.0</cytoscape.api.version>
 		<bundle.symbolicName>edu.umuc.swen670.gexf</bundle.symbolicName>
 		<bundle.namespace>edu.umuc.swen670.gexf</bundle.namespace>
+		<skipTests>false</skipTests>
 	</properties>
 
 	<modelVersion>4.0.0</modelVersion>
@@ -45,6 +46,7 @@
 					</execution>
 				</executions>
 				<configuration>
+					<skipTests>${skipTests}</skipTests>
 					<source>1.6</source>
 					<target>1.6</target>
 					<optimize>true</optimize>

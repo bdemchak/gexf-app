@@ -1,43 +1,58 @@
 package edu.umuc.swen670.gexf.internal.model;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 
 import org.cytoscape.model.CyNetwork;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class GEXFParser {
 
-	public void ParseStream(InputStream inputStream, CyNetwork cyNetwork) throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+	public void ParseStream(InputStream inputStream, CyNetwork cyNetwork) throws XPathExpressionException, ParserConfigurationException, SAXException, IOException, XMLStreamException {
+		byte[] streamBytes = getBytes(inputStream);
+		ByteArrayInputStream inputStream2 = new ByteArrayInputStream(streamBytes);
+		
+		XMLInputFactory xmlFactory = XMLInputFactory.newInstance();
+		XMLStreamReader xmlReader = xmlFactory.createXMLStreamReader(inputStream2);
+		
+		String version = "";
+		
+		while(xmlReader.hasNext()) {
+			int event = xmlReader.next();
+
+			switch(event) {
+			case XMLStreamConstants.START_ELEMENT :
+				if(xmlReader.getLocalName().equalsIgnoreCase("gexf")) {
+					version = xmlReader.getAttributeValue(null, "version").trim();
+					break;
+				}
+			}
+		}
+		
+		
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder;
 
 		dBuilder = dbFactory.newDocumentBuilder();
 
-		Document doc = dBuilder.parse(inputStream);
+		ByteArrayInputStream inputStream3 = new ByteArrayInputStream(streamBytes);
+		Document doc = dBuilder.parse(inputStream3);
 
 		doc.getDocumentElement().normalize();
-		
-		XPath xPath =  XPathFactory.newInstance().newXPath();
-		
-		String expression = "/gexf";
-		NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
-		
-		Element xElem = (Element) nodeList.item(0);
-		
-		String version = xElem.getAttribute(GEXFGraph.VERSION).trim();
-		String variant = xElem.hasAttribute(GEXFGraph.VARIANT) ? xElem.getAttribute(GEXFGraph.VARIANT).trim() : "";
 		
 		GEXFParserBase parser = null;
 		
@@ -60,4 +75,24 @@ public class GEXFParser {
 
 		parser.ParseStream();
 	}
+	
+	private byte[] getBytes(InputStream is) throws IOException {
+
+	    int len;
+	    int size = 10240;
+	    byte[] buf;
+
+	    if (is instanceof ByteArrayInputStream) {
+	      size = is.available();
+	      buf = new byte[size];
+	      len = is.read(buf, 0, size);
+	    } else {
+	      ByteArrayOutputStream bos = new ByteArrayOutputStream();
+	      buf = new byte[size];
+	      while ((len = is.read(buf, 0, size)) != -1)
+	        bos.write(buf, 0, len);
+	      buf = bos.toByteArray();
+	    }
+	    return buf;
+	  }
 }
