@@ -28,6 +28,10 @@ public class GEXF10Parser extends GEXFParserBase {
 
 	@Override
 	public void ParseStream() throws XPathExpressionException, ParserConfigurationException, SAXException, IOException, XMLStreamException {
+		
+		String defaultEdgeType = "";
+		String mode = "";
+		
 		while(_xmlReader.hasNext()) {
 			int event = _xmlReader.next();
 
@@ -37,18 +41,14 @@ public class GEXF10Parser extends GEXFParserBase {
 					ParseMeta();
 					break;
 				}
+				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFGraph.GRAPH)) {
+					List<String> graphAttributes = GetElementAttributes();
+					
+					defaultEdgeType = graphAttributes.contains(GEXFGraph.DEFAULTEDGETYPE) ? _xmlReader.getAttributeValue(null, GEXFGraph.DEFAULTEDGETYPE).trim() : EdgeTypes.UNDIRECTED;
+					mode = graphAttributes.contains(GEXFGraph.MODE) ? _xmlReader.getAttributeValue(null, GEXFGraph.MODE).trim() : GEXFGraph.STATIC;
+				}
 			}
 		}
-		
-		XPath xPath =  XPathFactory.newInstance().newXPath();
-		
-		String expression = "/gexf/graph";
-		NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(_doc, XPathConstants.NODESET);
-		Element xElem = (Element) nodeList.item(0);
-		
-		String defaultEdgeType = xElem.hasAttribute(GEXFGraph.DEFAULTEDGETYPE) ? xElem.getAttribute(GEXFGraph.DEFAULTEDGETYPE).trim() : EdgeTypes.SIMPLE;
-		String mode = xElem.hasAttribute(GEXFGraph.MODE) ? xElem.getAttribute(GEXFGraph.MODE).trim() : GEXFGraph.STATIC;
-
 
 		_attNodeMapping = ParseAttributeHeader("node");
 		
@@ -57,8 +57,9 @@ public class GEXF10Parser extends GEXFParserBase {
 		_cyNetwork.getDefaultEdgeTable().createColumn(GEXFEdge.WEIGHT, Double.class, true);
 
 
-		expression = "/gexf/graph/nodes/node";
-		nodeList = (NodeList) xPath.compile(expression).evaluate(_doc, XPathConstants.NODESET);
+		XPath xPath =  XPathFactory.newInstance().newXPath();
+		String expression = "/gexf/graph/nodes/node";
+		NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(_doc, XPathConstants.NODESET);
 		for (int i = 0; i < nodeList.getLength(); i++) {
 			Node xNode = nodeList.item(i);
 
