@@ -6,14 +6,9 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyIdentifiable;
@@ -21,15 +16,9 @@ import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 abstract class GEXFParserBase {
 
-	protected Document _doc = null;
 	protected XMLStreamReader _xmlReader = null;
 	protected CyNetwork _cyNetwork = null;
 	protected String _version = "";
@@ -38,16 +27,15 @@ abstract class GEXFParserBase {
 	AttributeMapping _attNodeMapping = null;
 	AttributeMapping _attEdgeMapping = null;
 	
-	public GEXFParserBase(Document doc, XMLStreamReader xmlReader, CyNetwork cyNetwork, String version) {
-		_doc = doc;
+	public GEXFParserBase(XMLStreamReader xmlReader, CyNetwork cyNetwork, String version) {
 		_xmlReader = xmlReader;
 		_cyNetwork = cyNetwork;
 		_version = version;
 	}
 	
-	public abstract void ParseStream() throws XPathExpressionException, ParserConfigurationException, IOException, XMLStreamException;
+	public abstract void ParseStream() throws IOException, XMLStreamException;
 	
-	protected void ParseMeta() throws XPathExpressionException, InvalidClassException, XMLStreamException {
+	protected void ParseMeta() throws InvalidClassException, XMLStreamException {
 		CyTable cyTable = _cyNetwork.getDefaultNetworkTable();
 		CyRow cyRow = cyTable.getRow(_cyNetwork.getSUID());
 				

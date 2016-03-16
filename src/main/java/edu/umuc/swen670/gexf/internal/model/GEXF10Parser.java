@@ -5,30 +5,20 @@ import java.io.InvalidClassException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 
 import org.cytoscape.model.CyNetwork;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 public class GEXF10Parser extends GEXFParserBase {
 
-	public GEXF10Parser(Document doc, XMLStreamReader xmlReader, CyNetwork cyNetwork, String version) {
-		super(doc, xmlReader, cyNetwork, version);
+	public GEXF10Parser(XMLStreamReader xmlReader, CyNetwork cyNetwork, String version) {
+		super(xmlReader, cyNetwork, version);
 	}
 
 	@Override
-	public void ParseStream() throws XPathExpressionException, ParserConfigurationException, IOException, XMLStreamException {
+	public void ParseStream() throws IOException, XMLStreamException {
 		
 		String defaultEdgeType = "";
 		String mode = "";
