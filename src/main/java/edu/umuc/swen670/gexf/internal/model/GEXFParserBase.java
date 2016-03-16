@@ -45,7 +45,7 @@ abstract class GEXFParserBase {
 		_version = version;
 	}
 	
-	public abstract void ParseStream() throws XPathExpressionException, ParserConfigurationException, SAXException, IOException, XMLStreamException;
+	public abstract void ParseStream() throws XPathExpressionException, ParserConfigurationException, IOException, XMLStreamException;
 	
 	protected void ParseMeta() throws XPathExpressionException, InvalidClassException, XMLStreamException {
 		CyTable cyTable = _cyNetwork.getDefaultNetworkTable();
@@ -169,66 +169,130 @@ abstract class GEXFParserBase {
 		throw new InvalidClassException("Missing AttributeHeader tags");
 	}
 	
-	protected void ParseNode(Node xNode, String expression) throws XPathExpressionException, IOException {
-		if (xNode.getNodeType() == Node.ELEMENT_NODE) {
-			Element xElem = (Element) xNode;
+	protected void ParseNode(CyNode cyNodeParent) throws IOException, XMLStreamException {
+		
+		CyNode cyNode = null;
+		
+		while(_xmlReader.hasNext()) {
+			int event = _xmlReader.next();
 
-			String xLabel = xElem.getAttribute(GEXFNode.LABEL);
-			String xId = xElem.getAttribute(GEXFNode.ID);
+			switch(event) {
+			case XMLStreamConstants.END_ELEMENT :
+				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFNode.NODES)) {
+					return;
+				}
+				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFNode.NODE)) {
+					cyNode = null;
+					break;
+				}
+			case XMLStreamConstants.START_ELEMENT :
+				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFNode.NODE)) {
+					String xLabel = _xmlReader.getAttributeValue(null, GEXFNode.LABEL).trim();
+					String xId = _xmlReader.getAttributeValue(null, GEXFNode.ID).trim();
+					
+					cyNode = _cyNetwork.addNode();
+					_cyNetwork.getRow(cyNode).set(CyNetwork.NAME, xLabel);
 
-			CyNode cyNode = _cyNetwork.addNode();
-			_cyNetwork.getRow(cyNode).set(CyNetwork.NAME, xLabel);
-
-			_idMapping.put(xId, cyNode.getSUID());
-
-			if(xNode.hasChildNodes()) {
-				String attExpression = expression + "[@id='" + xId + "']/attvalues/attvalue";
-
-				ParseAttributes(cyNode, _attNodeMapping, attExpression);
+					_idMapping.put(xId, cyNode.getSUID());
+				}
+				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFAttribute.ATTVALUES)) {
+					ParseAttributes(new CyIdentifiable[] {cyNode}, _attNodeMapping);
+				}
+				
+				break;
 			}
 		}
+		
+		throw new InvalidClassException("Missing Node tags");
 	}
 	
-	protected void ParseEdges(String defaultEdgeType) throws XPathExpressionException, IOException {
-		XPath xPath =  XPathFactory.newInstance().newXPath();
-		String expression = "/gexf/graph/edges/edge";
-		NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(_doc, XPathConstants.NODESET);
-		for (int i = 0; i < nodeList.getLength(); i++) {
-			Node xNode = nodeList.item(i);
+	protected void ParseEdges(String defaultEdgeType) throws IOException, XMLStreamException {
+		
+		CyEdge cyEdge = null;
+		CyEdge cyEdgeReverse = null;
+		
+		while(_xmlReader.hasNext()) {
+			int event = _xmlReader.next();
 
-			if (xNode.getNodeType() == Node.ELEMENT_NODE) {
-				Element xElem = (Element) xNode;
-
-				String xId = xElem.getAttribute(GEXFEdge.ID).trim();
-				String xSource = xElem.getAttribute(GEXFEdge.SOURCE).trim();
-				String xTarget = xElem.getAttribute(GEXFEdge.TARGET).trim();
-				String xEdgeType = xElem.hasAttribute(GEXFEdge.EDGETYPE) ? xElem.getAttribute(GEXFEdge.EDGETYPE).trim() : defaultEdgeType;
-				String xEdgeWeight = xElem.hasAttribute(GEXFEdge.WEIGHT) ? xElem.getAttribute(GEXFEdge.WEIGHT).trim() : "";
-				
-
-				CyEdge cyEdge = _cyNetwork.addEdge(_cyNetwork.getNode(_idMapping.get(xSource)), _cyNetwork.getNode(_idMapping.get(xTarget)), IsDirected(xEdgeType));
-				CyEdge cyEdgeReverse = IsBiDirectional(xEdgeType) ? _cyNetwork.addEdge(_cyNetwork.getNode(_idMapping.get(xTarget)), _cyNetwork.getNode(_idMapping.get(xSource)), IsDirected(xEdgeType)) : null;
-				
-				_cyNetwork.getRow(cyEdge).set(GEXFEdge.EDGETYPE, xEdgeType);
-				if(cyEdgeReverse!=null) _cyNetwork.getRow(cyEdgeReverse).set(GEXFEdge.EDGETYPE, xEdgeType);
-				
-				if(xElem.hasAttribute(GEXFEdge.WEIGHT)) {
-					_cyNetwork.getRow(cyEdge).set(GEXFEdge.WEIGHT, Double.parseDouble(xEdgeWeight));
-					if(cyEdgeReverse!=null) _cyNetwork.getRow(cyEdgeReverse).set(GEXFEdge.WEIGHT, Double.parseDouble(xEdgeWeight));
+			switch(event) {
+			case XMLStreamConstants.END_ELEMENT :
+				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFEdge.EDGES)) {
+					return;
 				}
-				
-				if(xNode.hasChildNodes()) {
-					String attExpression = expression + "[@id='" + xId + "']/attvalues/attvalue";
+				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFEdge.EDGE)) {
+					cyEdge = null;
+					cyEdgeReverse = null;
+					break;
+				}
+			case XMLStreamConstants.START_ELEMENT :
+				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFEdge.EDGE)) {
+					List<String> edgeElementAttributes = GetElementAttributes();
 					
-					ParseAttributes(cyEdge, _attEdgeMapping, attExpression);
-					if(cyEdgeReverse!=null) ParseAttributes(cyEdgeReverse, _attEdgeMapping, attExpression);
+					String xId = _xmlReader.getAttributeValue(null, GEXFEdge.ID).trim();
+					String xSource = _xmlReader.getAttributeValue(null, GEXFEdge.SOURCE).trim();
+					String xTarget = _xmlReader.getAttributeValue(null, GEXFEdge.TARGET).trim();
+					String xEdgeType = edgeElementAttributes.contains(GEXFEdge.EDGETYPE) ? _xmlReader.getAttributeValue(null, GEXFEdge.EDGETYPE).trim() : defaultEdgeType;
+					String xEdgeWeight = edgeElementAttributes.contains(GEXFEdge.WEIGHT) ? _xmlReader.getAttributeValue(null, GEXFEdge.WEIGHT).trim() : "";
+					
+					cyEdge = _cyNetwork.addEdge(_cyNetwork.getNode(_idMapping.get(xSource)), _cyNetwork.getNode(_idMapping.get(xTarget)), IsDirected(xEdgeType));
+					cyEdgeReverse = IsBiDirectional(xEdgeType) ? _cyNetwork.addEdge(_cyNetwork.getNode(_idMapping.get(xTarget)), _cyNetwork.getNode(_idMapping.get(xSource)), IsDirected(xEdgeType)) : null;
+					
+					_cyNetwork.getRow(cyEdge).set(GEXFEdge.EDGETYPE, xEdgeType);
+					if(cyEdgeReverse!=null) _cyNetwork.getRow(cyEdgeReverse).set(GEXFEdge.EDGETYPE, xEdgeType);
+					
+					if(edgeElementAttributes.contains(GEXFEdge.WEIGHT)) {
+						_cyNetwork.getRow(cyEdge).set(GEXFEdge.WEIGHT, Double.parseDouble(xEdgeWeight));
+						if(cyEdgeReverse!=null) _cyNetwork.getRow(cyEdgeReverse).set(GEXFEdge.WEIGHT, Double.parseDouble(xEdgeWeight));
+					}
 				}
+				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFAttribute.ATTVALUES)) {
+					ParseAttributes(new CyIdentifiable[] {cyEdge, cyEdgeReverse}, _attEdgeMapping);
+				}
+				
+				break;
 			}
 		}
+		
+		throw new InvalidClassException("Missing Edge tags");
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	protected void ParseAttributes(CyIdentifiable cyIdentifiable, AttributeMapping attMapping, String expression) throws XPathExpressionException, IOException {
+	protected void ParseAttributes(CyIdentifiable[] cyIdentifiables, AttributeMapping attMapping) throws IOException, XMLStreamException {
+		
+		while(_xmlReader.hasNext()) {
+			int event = _xmlReader.next();
+
+			switch(event) {
+			case XMLStreamConstants.END_ELEMENT :
+				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFAttribute.ATTVALUES)) {
+					return;
+				}
+				break;
+			case XMLStreamConstants.START_ELEMENT :
+				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFAttribute.ATTVALUE)) {
+					String xFor = _xmlReader.getAttributeValue(null, GEXFAttribute.FOR).trim();
+					String xValue = _xmlReader.getAttributeValue(null, GEXFAttribute.VALUE).trim();
+					
+					Class type = GetClass(attMapping.Type.get(xFor));
+					if(!type.isArray()) {
+						for(CyIdentifiable cyIdentifiable : cyIdentifiables) {
+							_cyNetwork.getRow(cyIdentifiable).set(attMapping.Id.get(xFor), GenericParse(xValue, type));
+						}
+					}
+					else {
+						for(CyIdentifiable cyIdentifiable : cyIdentifiables) {
+							_cyNetwork.getRow(cyIdentifiable).set(attMapping.Id.get(xFor), ParseArray(xValue, type));
+						}
+					}
+				}
+				break;
+			}
+		}
+		
+		
+		throw new InvalidClassException("Missing Attribute Value tags");
+		
+/*
 		XPath xPath =  XPathFactory.newInstance().newXPath();
 		NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(_doc, XPathConstants.NODESET);
 
@@ -248,6 +312,7 @@ abstract class GEXFParserBase {
 				}
 			}
 		}
+*/
 	}
 	
 	@SuppressWarnings("unchecked")

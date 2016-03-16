@@ -29,15 +29,22 @@ public class GEXF13Parser extends GEXFParserBase {
 	}
 
 	@Override
-	public void ParseStream() throws XPathExpressionException, ParserConfigurationException, SAXException, IOException, XMLStreamException {
+	public void ParseStream() throws XPathExpressionException, ParserConfigurationException, IOException, XMLStreamException {
 		
 		String defaultEdgeType = "";
 		String mode = "";
+		
+		_cyNetwork.getDefaultEdgeTable().createColumn(GEXFEdge.EDGETYPE, String.class, true);
+		_cyNetwork.getDefaultEdgeTable().createColumn(GEXFEdge.WEIGHT, Double.class, true);
 		
 		while(_xmlReader.hasNext()) {
 			int event = _xmlReader.next();
 
 			switch(event) {
+			case XMLStreamConstants.END_ELEMENT :
+				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFGraph.GRAPH)) {
+					return;
+				}
 			case XMLStreamConstants.START_ELEMENT :
 				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFMeta.META)) {
 					ParseMeta();
@@ -61,23 +68,14 @@ public class GEXF13Parser extends GEXFParserBase {
 						throw new InvalidClassException(attributeClass);
 					}
 				}
+				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFNode.NODES)) {
+					ParseNode(null);
+				}
+				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFEdge.EDGES)) {
+					ParseEdges(defaultEdgeType);
+				}
 			}
 		}
-
-		_cyNetwork.getDefaultEdgeTable().createColumn(GEXFEdge.EDGETYPE, String.class, true);
-		_cyNetwork.getDefaultEdgeTable().createColumn(GEXFEdge.WEIGHT, Double.class, true);
-
-
-		XPath xPath =  XPathFactory.newInstance().newXPath();
-		String expression = "/gexf/graph/nodes/node";
-		NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(_doc, XPathConstants.NODESET);
-		for (int i = 0; i < nodeList.getLength(); i++) {
-			Node xNode = nodeList.item(i);
-
-			ParseNode(xNode, expression);
-		}
-
-		ParseEdges(defaultEdgeType);
 	}
 	
 	@Override

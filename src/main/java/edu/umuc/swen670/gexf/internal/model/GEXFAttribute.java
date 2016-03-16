@@ -7,6 +7,8 @@ public final class GEXFAttribute {
 	public static final String CLASS = "class";
 	public static final String NODE = "node";
 	public static final String EDGE = "edge";
+	public static final String ATTVALUES = "attvalues";
+	public static final String ATTVALUE = "attvalue";
 	
 	public static final String ID = "id";
 	public static final String TITLE = "title";
