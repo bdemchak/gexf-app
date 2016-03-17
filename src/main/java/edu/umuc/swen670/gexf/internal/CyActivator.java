@@ -3,6 +3,7 @@ package edu.umuc.swen670.gexf.internal;
 import java.util.Properties;
 
 import org.cytoscape.application.CyApplicationManager;
+import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.io.CyFileFilter;
 import org.cytoscape.io.read.InputStreamTaskFactory;
 import org.cytoscape.io.util.StreamUtil;
@@ -28,10 +29,11 @@ public class CyActivator extends AbstractCyActivator {
 		final CyNetworkFactory cyNetworkFactory = getService(context, CyNetworkFactory.class);
 		final CyNetworkManager cyNetworkManager = getService(context, CyNetworkManager.class);
 		final CyRootNetworkManager cyRootNetworkManager = getService(context, CyRootNetworkManager.class);
+		final CyEventHelper cyEventHelper = getService(context, CyEventHelper.class);
 
 		//register reader
 		final CyFileFilter gexfFileFilter = new GEXFFileFilter(streamUtil);
-		final GEXFNetworkReaderFactory gexfNetworkReaderFactory = new GEXFNetworkReaderFactory(gexfFileFilter, cyNetworkViewFactory, cyNetworkFactory, cyNetworkManager, cyRootNetworkManager);
+		final GEXFNetworkReaderFactory gexfNetworkReaderFactory = new GEXFNetworkReaderFactory(gexfFileFilter, cyNetworkViewFactory, cyNetworkFactory, cyNetworkManager, cyRootNetworkManager, cyEventHelper);
 		final Properties gexfNetworkReaderFactoryProperties = new Properties();
 		gexfNetworkReaderFactoryProperties.put(ServiceProperties.ID, "GEXFNetworkReaderFactory");
 		registerService(context, gexfNetworkReaderFactory, InputStreamTaskFactory.class, gexfNetworkReaderFactoryProperties);

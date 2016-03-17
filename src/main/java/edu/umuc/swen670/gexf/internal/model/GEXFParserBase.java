@@ -1,5 +1,6 @@
 package edu.umuc.swen670.gexf.internal.model;
 
+import java.awt.Color;
 import java.io.IOException;
 import java.io.InvalidClassException;
 import java.util.ArrayList;
@@ -16,6 +17,9 @@ import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
+import org.cytoscape.view.presentation.property.BasicVisualLexicon;
+
+import edu.umuc.swen670.gexf.internal.io.DelayedVizProp;
 
 abstract class GEXFParserBase {
 
@@ -27,13 +31,15 @@ abstract class GEXFParserBase {
 	AttributeMapping _attNodeMapping = null;
 	AttributeMapping _attEdgeMapping = null;
 	
+	protected List<DelayedVizProp> _vizProps = new ArrayList<DelayedVizProp>();
+	
 	public GEXFParserBase(XMLStreamReader xmlReader, CyNetwork cyNetwork, String version) {
 		_xmlReader = xmlReader;
 		_cyNetwork = cyNetwork;
 		_version = version;
 	}
 	
-	public abstract void ParseStream() throws IOException, XMLStreamException;
+	public abstract List<DelayedVizProp> ParseStream() throws IOException, XMLStreamException;
 	
 	protected void ParseMeta() throws InvalidClassException, XMLStreamException {
 		CyTable cyTable = _cyNetwork.getDefaultNetworkTable();
@@ -171,8 +177,8 @@ abstract class GEXFParserBase {
 				}
 				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFNode.NODE)) {
 					cyNode = null;
-					break;
 				}
+				break;
 			case XMLStreamConstants.START_ELEMENT :
 				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFNode.NODE)) {
 					String xLabel = _xmlReader.getAttributeValue(null, GEXFNode.LABEL).trim();
@@ -185,6 +191,14 @@ abstract class GEXFParserBase {
 				}
 				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFAttribute.ATTVALUES)) {
 					ParseAttributes(new CyIdentifiable[] {cyNode}, _attNodeMapping);
+				}
+				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFViz.COLOR)) {
+					int red = Integer.parseInt(_xmlReader.getAttributeValue(null, GEXFViz.RED).trim());
+					int green = Integer.parseInt(_xmlReader.getAttributeValue(null, GEXFViz.GREEN).trim());
+					int blue = Integer.parseInt(_xmlReader.getAttributeValue(null, GEXFViz.BLUE).trim());
+					Color color = new Color(red, green, blue);
+					
+					_vizProps.add(new DelayedVizProp(cyNode, BasicVisualLexicon.NODE_FILL_COLOR, color, true));
 				}
 				
 				break;

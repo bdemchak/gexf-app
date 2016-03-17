@@ -11,6 +11,8 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.cytoscape.model.CyNetwork;
 
+import edu.umuc.swen670.gexf.internal.io.DelayedVizProp;
+
 public class GEXF10Parser extends GEXFParserBase {
 
 	public GEXF10Parser(XMLStreamReader xmlReader, CyNetwork cyNetwork, String version) {
@@ -18,7 +20,7 @@ public class GEXF10Parser extends GEXFParserBase {
 	}
 
 	@Override
-	public void ParseStream() throws IOException, XMLStreamException {
+	public List<DelayedVizProp> ParseStream() throws IOException, XMLStreamException {
 		
 		String defaultEdgeType = "";
 		String mode = "";
@@ -32,7 +34,7 @@ public class GEXF10Parser extends GEXFParserBase {
 			switch(event) {
 			case XMLStreamConstants.END_ELEMENT :
 				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFGraph.GRAPH)) {
-					return;
+					return _vizProps;
 				}
 			case XMLStreamConstants.START_ELEMENT :
 				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFMeta.META)) {
@@ -65,6 +67,8 @@ public class GEXF10Parser extends GEXFParserBase {
 				}
 			}
 		}
+		
+		throw new InvalidClassException("Missing Graph tags");
 	}
 	
 	@Override

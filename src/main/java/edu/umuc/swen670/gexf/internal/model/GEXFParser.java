@@ -2,6 +2,7 @@ package edu.umuc.swen670.gexf.internal.model;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -10,12 +11,16 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.cytoscape.model.CyNetwork;
 
+import edu.umuc.swen670.gexf.internal.io.DelayedVizProp;
+
 
 public class GEXFParser {
 
-	public void ParseStream(InputStream inputStream, CyNetwork cyNetwork) throws IOException, XMLStreamException {
+	public List<DelayedVizProp> ParseStream(InputStream inputStream, CyNetwork cyNetwork) throws IOException, XMLStreamException {
 		XMLInputFactory xmlFactory = XMLInputFactory.newInstance();
 		XMLStreamReader xmlReader = xmlFactory.createXMLStreamReader(inputStream);
+		
+		List<DelayedVizProp> vizProps = null;
 		
 		while(xmlReader.hasNext()) {
 			int event = xmlReader.next();
@@ -44,9 +49,11 @@ public class GEXFParser {
 						parser = new GEXF13Parser(xmlReader, cyNetwork, version);
 					}
 
-					parser.ParseStream();
+					vizProps = parser.ParseStream();
 				}
 			}
 		}
+		
+		return vizProps;
 	}
 }

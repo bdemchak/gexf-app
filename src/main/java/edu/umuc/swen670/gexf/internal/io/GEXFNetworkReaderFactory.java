@@ -2,6 +2,7 @@ package edu.umuc.swen670.gexf.internal.io;
 
 import java.io.InputStream;
 
+import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.io.CyFileFilter;
 import org.cytoscape.io.read.InputStreamTaskFactory;
 import org.cytoscape.model.CyNetworkFactory;
@@ -17,15 +18,17 @@ public class GEXFNetworkReaderFactory implements InputStreamTaskFactory {
 	private final CyNetworkFactory _cyNetworkFactory;
 	private final CyNetworkManager _cyNetworkManager;
 	private final CyRootNetworkManager _cyRootNetworkManager;
+	private final CyEventHelper _cyEventHelper;
 
 	public GEXFNetworkReaderFactory(final CyFileFilter cyFileFilter, final CyNetworkViewFactory cyNetworkViewFactory,
 			final CyNetworkFactory cyNetworkFactory, final CyNetworkManager cyNetworkManager,
-			final CyRootNetworkManager cyRootNetworkManager) {
+			final CyRootNetworkManager cyRootNetworkManager, final CyEventHelper cyEventHelper) {
 		_cyFileFilter = cyFileFilter;
 		_cyNetworkViewFactory = cyNetworkViewFactory;
 		_cyNetworkFactory = cyNetworkFactory;
 		_cyNetworkManager = cyNetworkManager;
 		_cyRootNetworkManager = cyRootNetworkManager;
+		_cyEventHelper = cyEventHelper;
 	}
 
 
@@ -36,7 +39,7 @@ public class GEXFNetworkReaderFactory implements InputStreamTaskFactory {
 
 	@Override
 	public TaskIterator createTaskIterator(InputStream is, String inputName) {
-		return new TaskIterator(new GEXFNetworkReader(is, _cyNetworkViewFactory, _cyNetworkFactory, _cyNetworkManager, _cyRootNetworkManager));
+		return new TaskIterator(new GEXFNetworkReader(is, _cyNetworkViewFactory, _cyNetworkFactory, _cyNetworkManager, _cyRootNetworkManager, _cyEventHelper));
 	}
 
 	@Override

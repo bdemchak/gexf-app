@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.cytoscape.ding.NetworkViewTestSupport;
+import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.io.read.CyNetworkReader;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
@@ -30,8 +31,9 @@ public class TestBase {
 		CyNetworkViewFactory cyNetworkViewFactory = new NetworkViewTestSupport().getNetworkViewFactory();
 		CyNetworkManager cyNetworkManager = new NetworkTestSupport().getNetworkManager();
 		CyRootNetworkManager cyRootNetworkManager = new NetworkTestSupport().getRootNetworkFactory();
+		CyEventHelper cyEventHelper = mock(CyEventHelper.class);
 		
-		CyNetworkReader reader = new GEXFNetworkReader(stream, cyNetworkViewFactory, cyNetworkFactory, cyNetworkManager, cyRootNetworkManager);
+		CyNetworkReader reader = new GEXFNetworkReader(stream, cyNetworkViewFactory, cyNetworkFactory, cyNetworkManager, cyRootNetworkManager, cyEventHelper);
 		
 		TaskMonitor monitor = mock(TaskMonitor.class);
 		
