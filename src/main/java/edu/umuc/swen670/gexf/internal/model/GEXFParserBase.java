@@ -196,7 +196,8 @@ abstract class GEXFParserBase {
 					int red = Integer.parseInt(_xmlReader.getAttributeValue(null, GEXFViz.RED).trim());
 					int green = Integer.parseInt(_xmlReader.getAttributeValue(null, GEXFViz.GREEN).trim());
 					int blue = Integer.parseInt(_xmlReader.getAttributeValue(null, GEXFViz.BLUE).trim());
-					Color color = new Color(red, green, blue);
+					int alpha = GetElementAttributes().contains(GEXFViz.ALPHA) ? (int)(255 * Float.parseFloat(_xmlReader.getAttributeValue(null, GEXFViz.ALPHA).trim())) : 255;
+					Color color = new Color(red, green, blue, alpha);
 					
 					_vizProps.add(new DelayedVizProp(cyNode, BasicVisualLexicon.NODE_FILL_COLOR, color, true));
 				}
