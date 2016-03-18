@@ -201,6 +201,17 @@ abstract class GEXFParserBase {
 					
 					_vizProps.add(new DelayedVizProp(cyNode, BasicVisualLexicon.NODE_FILL_COLOR, color, true));
 				}
+				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFViz.POSITION)) {
+					List<String> elementAttributes = GetElementAttributes();
+					
+					double x = elementAttributes.contains(GEXFViz.X) ? Double.parseDouble(_xmlReader.getAttributeValue(null, GEXFViz.X).trim()) : 0.0d;
+					double y = elementAttributes.contains(GEXFViz.Y) ? -Double.parseDouble(_xmlReader.getAttributeValue(null, GEXFViz.Y).trim()) : 0.0d;
+					double z = elementAttributes.contains(GEXFViz.Z) ? Double.parseDouble(_xmlReader.getAttributeValue(null, GEXFViz.Z).trim()) : 0.0d;
+					
+					if(elementAttributes.contains(GEXFViz.X)) {_vizProps.add(new DelayedVizProp(cyNode, BasicVisualLexicon.NODE_X_LOCATION, x, true));}
+					if(elementAttributes.contains(GEXFViz.Y)) {_vizProps.add(new DelayedVizProp(cyNode, BasicVisualLexicon.NODE_Y_LOCATION, y, true));}
+					if(elementAttributes.contains(GEXFViz.Z)) {_vizProps.add(new DelayedVizProp(cyNode, BasicVisualLexicon.NODE_Z_LOCATION, z, true));}
+				}
 				
 				break;
 			}
