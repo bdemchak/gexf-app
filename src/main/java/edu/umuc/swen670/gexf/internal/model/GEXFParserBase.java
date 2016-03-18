@@ -317,28 +317,6 @@ abstract class GEXFParserBase {
 		
 		
 		throw new InvalidClassException("Missing Attribute Value tags");
-		
-/*
-		XPath xPath =  XPathFactory.newInstance().newXPath();
-		NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(_doc, XPathConstants.NODESET);
-
-		for (int i = 0; i < nodeList.getLength(); i++) {
-			Node xAttNode = nodeList.item(i);
-			if (xAttNode.getNodeType() == Node.ELEMENT_NODE) {
-				Element xElem = (Element) xAttNode;
-				String xFor = xElem.getAttribute(GEXFAttribute.FOR).trim();
-				String xValue = xElem.getAttribute(GEXFAttribute.VALUE).trim();
-
-				Class type = GetClass(attMapping.Type.get(xFor));
-				if(!type.isArray()) {
-					_cyNetwork.getRow(cyIdentifiable).set(attMapping.Id.get(xFor), GenericParse(xValue, type));
-				}
-				else {
-					_cyNetwork.getRow(cyIdentifiable).set(attMapping.Id.get(xFor), ParseArray(xValue, type));
-				}
-			}
-		}
-*/
 	}
 	
 	@SuppressWarnings("unchecked")
