@@ -18,6 +18,8 @@ import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
+import org.cytoscape.view.presentation.property.NodeShapeVisualProperty;
+import org.cytoscape.view.presentation.property.values.NodeShape;
 
 import edu.umuc.swen670.gexf.internal.io.DelayedVizProp;
 
@@ -217,6 +219,11 @@ abstract class GEXFParserBase {
 					
 					_vizProps.add(new DelayedVizProp(cyNode, BasicVisualLexicon.NODE_SIZE, value, true));
 				}
+				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFViz.SHAPE)) {
+					String value = _xmlReader.getAttributeValue(null, GEXFViz.VALUE).trim();
+					
+					_vizProps.add(new DelayedVizProp(cyNode, BasicVisualLexicon.NODE_SHAPE, ConvertNodeShape(value), true));
+				}
 				
 				break;
 			}
@@ -411,6 +418,27 @@ abstract class GEXFParserBase {
 		}
 		
 		return attributes;
+	}
+	
+	protected NodeShape ConvertNodeShape(String shape) {
+		if(shape.equalsIgnoreCase(GEXFViz.DISC)) {
+			return NodeShapeVisualProperty.ELLIPSE;
+		}
+		else if(shape.equalsIgnoreCase(GEXFViz.SQUARE)) {
+			return NodeShapeVisualProperty.RECTANGLE;
+		}
+		else if(shape.equalsIgnoreCase(GEXFViz.TRIANGLE)) {
+			return NodeShapeVisualProperty.TRIANGLE;
+		}
+		else if(shape.equalsIgnoreCase(GEXFViz.DIAMOND)) {
+			return NodeShapeVisualProperty.DIAMOND;
+		}
+		else if(shape.equalsIgnoreCase(GEXFViz.IMAGE)) {
+			return NodeShapeVisualProperty.OCTAGON;
+		}
+		else {
+			return NodeShapeVisualProperty.ROUND_RECTANGLE;
+		}
 	}
 	
 	protected abstract Boolean IsDirected(String direction);
