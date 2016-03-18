@@ -212,6 +212,11 @@ abstract class GEXFParserBase {
 					if(elementAttributes.contains(GEXFViz.Y)) {_vizProps.add(new DelayedVizProp(cyNode, BasicVisualLexicon.NODE_Y_LOCATION, y, true));}
 					if(elementAttributes.contains(GEXFViz.Z)) {_vizProps.add(new DelayedVizProp(cyNode, BasicVisualLexicon.NODE_Z_LOCATION, z, true));}
 				}
+				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFViz.SIZE)) {
+					double value = Double.parseDouble(_xmlReader.getAttributeValue(null, GEXFViz.VALUE).trim());
+					
+					_vizProps.add(new DelayedVizProp(cyNode, BasicVisualLexicon.NODE_SIZE, value, true));
+				}
 				
 				break;
 			}
