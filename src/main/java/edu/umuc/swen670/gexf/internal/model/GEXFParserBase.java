@@ -30,8 +30,8 @@ abstract class GEXFParserBase {
 	protected String _version = "";
 	
 	protected Hashtable<String, Long> _idMapping = new Hashtable<String, Long>();
-	AttributeMapping _attNodeMapping = null;
-	AttributeMapping _attEdgeMapping = null;
+	protected AttributeMapping _attNodeMapping = null;
+	protected AttributeMapping _attEdgeMapping = null;
 	
 	protected List<DelayedVizProp> _vizProps = new ArrayList<DelayedVizProp>();
 	
