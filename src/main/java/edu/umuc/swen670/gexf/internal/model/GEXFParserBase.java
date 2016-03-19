@@ -231,6 +231,7 @@ abstract class GEXFParserBase {
 					ArrayList<CyNode> nodesToAddToGroup = ParseNodes(cyNode);
 					if (cyNode != null) {
 						_cyGroupFactory.createGroup(_cyNetwork, cyNode, nodesToAddToGroup, null, true);
+					}
 				}
 				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFViz.POSITION)) {
 					List<String> elementAttributes = GetElementAttributes();
