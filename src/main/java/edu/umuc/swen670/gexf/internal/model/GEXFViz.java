@@ -10,6 +10,8 @@ public final class GEXFViz {
 	public static final String SHAPE = "shape";
 	public static final String THICKNESS = "thickness";
 	
+	public static final String VALUE = "value";
+	
 	public static final String RED = "r";
 	public static final String GREEN = "g";
 	public static final String BLUE = "b";

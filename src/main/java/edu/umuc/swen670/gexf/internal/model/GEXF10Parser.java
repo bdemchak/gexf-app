@@ -47,6 +47,7 @@ public class GEXF10Parser extends GEXFParserBase {
 					
 					defaultEdgeType = graphAttributes.contains(GEXFGraph.DEFAULTEDGETYPE) ? _xmlReader.getAttributeValue(null, GEXFGraph.DEFAULTEDGETYPE).trim() : EdgeTypes.UNDIRECTED;
 					mode = graphAttributes.contains(GEXFGraph.MODE) ? _xmlReader.getAttributeValue(null, GEXFGraph.MODE).trim() : GEXFGraph.STATIC;
+					if(mode.equalsIgnoreCase(GEXFGraph.DYNAMIC)) {throw new InvalidClassException("Dynamic graphs are not supported.");}
 				}
 				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFAttribute.ATTRIBUTES)) {
 					String attributeClass = _xmlReader.getAttributeValue(null, GEXFAttribute.CLASS).trim();
