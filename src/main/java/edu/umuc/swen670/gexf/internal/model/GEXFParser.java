@@ -28,11 +28,16 @@ public class GEXFParser {
 			switch(event) {
 			case XMLStreamConstants.START_ELEMENT :
 				if(xmlReader.getLocalName().equalsIgnoreCase("gexf")) {
-					String version = xmlReader.getAttributeValue(null, "version").trim();
+					String version = xmlReader.getAttributeValue(null, "version");
+					if(version!=null) {version = version.trim();}
 					
 					GEXFParserBase parser = null;
 					
-					if(version.startsWith(GEXFGraph.VERSION0) || version.equalsIgnoreCase(GEXFGraph.VERSION10)) {
+					if(version == null) {
+						//no version declared, try to parse with the latest supported version
+						parser = new GEXF13Parser(xmlReader, cyNetwork, version);
+					}
+					else if(version.startsWith(GEXFGraph.VERSION0) || version.equalsIgnoreCase(GEXFGraph.VERSION10)) {
 						parser = new GEXF10Parser(xmlReader, cyNetwork, version);
 					}
 					else if(version.equalsIgnoreCase(GEXFGraph.VERSION11)) {
