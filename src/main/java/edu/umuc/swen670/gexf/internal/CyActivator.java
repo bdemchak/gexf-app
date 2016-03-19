@@ -9,6 +9,8 @@ import org.cytoscape.io.read.InputStreamTaskFactory;
 import org.cytoscape.io.util.StreamUtil;
 import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
+import org.cytoscape.group.CyGroupFactory;
+import org.cytoscape.group.CyGroupManager;
 import org.cytoscape.model.subnetwork.CyRootNetworkManager;
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.view.model.CyNetworkViewFactory;
@@ -30,10 +32,12 @@ public class CyActivator extends AbstractCyActivator {
 		final CyNetworkManager cyNetworkManager = getService(context, CyNetworkManager.class);
 		final CyRootNetworkManager cyRootNetworkManager = getService(context, CyRootNetworkManager.class);
 		final CyEventHelper cyEventHelper = getService(context, CyEventHelper.class);
+		final CyGroupFactory cyGroupFactory = getService(context, CyGroupFactory.class);
+		final CyGroupManager cyGroupManager = getService(context, CyGroupManager.class);
 
 		//register reader
 		final CyFileFilter gexfFileFilter = new GEXFFileFilter(streamUtil);
-		final GEXFNetworkReaderFactory gexfNetworkReaderFactory = new GEXFNetworkReaderFactory(gexfFileFilter, cyNetworkViewFactory, cyNetworkFactory, cyNetworkManager, cyRootNetworkManager, cyEventHelper);
+		final GEXFNetworkReaderFactory gexfNetworkReaderFactory = new GEXFNetworkReaderFactory(gexfFileFilter, cyNetworkViewFactory, cyNetworkFactory, cyNetworkManager, cyRootNetworkManager, cyEventHelper, cyGroupFactory, cyGroupManager);
 		final Properties gexfNetworkReaderFactoryProperties = new Properties();
 		gexfNetworkReaderFactoryProperties.put(ServiceProperties.ID, "GEXFNetworkReaderFactory");
 		registerService(context, gexfNetworkReaderFactory, InputStreamTaskFactory.class, gexfNetworkReaderFactoryProperties);

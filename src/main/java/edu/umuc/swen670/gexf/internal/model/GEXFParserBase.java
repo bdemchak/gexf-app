@@ -11,6 +11,7 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
+import org.cytoscape.group.CyGroupFactory;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyNetwork;
@@ -26,6 +27,7 @@ abstract class GEXFParserBase {
 	protected XMLStreamReader _xmlReader = null;
 	protected CyNetwork _cyNetwork = null;
 	protected String _version = "";
+	protected CyGroupFactory _cyGroupFactory = null;
 	
 	protected Hashtable<String, Long> _idMapping = new Hashtable<String, Long>();
 	AttributeMapping _attNodeMapping = null;
@@ -33,10 +35,11 @@ abstract class GEXFParserBase {
 	
 	protected List<DelayedVizProp> _vizProps = new ArrayList<DelayedVizProp>();
 	
-	public GEXFParserBase(XMLStreamReader xmlReader, CyNetwork cyNetwork, String version) {
+	public GEXFParserBase(XMLStreamReader xmlReader, CyNetwork cyNetwork, String version, CyGroupFactory cyGroupFactory) {
 		_xmlReader = xmlReader;
 		_cyNetwork = cyNetwork;
 		_version = version;
+		_cyGroupFactory = cyGroupFactory;
 	}
 	
 	public abstract List<DelayedVizProp> ParseStream() throws IOException, XMLStreamException;
@@ -163,9 +166,13 @@ abstract class GEXFParserBase {
 		throw new InvalidClassException("Missing AttributeHeader tags");
 	}
 	
-	protected void ParseNode(CyNode cyNodeParent) throws IOException, XMLStreamException {
+	protected ArrayList<CyNode> ParseNodes(CyNode cyNodeParent) throws IOException, XMLStreamException {
 		
+		ArrayList<CyNode> cyNodes = new ArrayList<CyNode>();
 		CyNode cyNode = null;
+		
+//		CyGroup group = _cyGroupFactory.createGroup(_cyNetwork, cyNode, null, null, cyNodeParent == null);
+//		cyGroupStack.add(group);
 		
 		while(_xmlReader.hasNext()) {
 			int event = _xmlReader.next();
@@ -173,9 +180,10 @@ abstract class GEXFParserBase {
 			switch(event) {
 			case XMLStreamConstants.END_ELEMENT :
 				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFNode.NODES)) {
-					return;
+					return cyNodes;
 				}
 				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFNode.NODE)) {
+					cyNodes.add(cyNode);
 					cyNode = null;
 				}
 				break;
@@ -199,6 +207,12 @@ abstract class GEXFParserBase {
 					Color color = new Color(red, green, blue);
 					
 					_vizProps.add(new DelayedVizProp(cyNode, BasicVisualLexicon.NODE_FILL_COLOR, color, true));
+				}
+				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFNode.NODES)) { 
+					ArrayList<CyNode> nodesToAddToGroup = ParseNodes(cyNode);
+					if (cyNode != null) {
+						_cyGroupFactory.createGroup(_cyNetwork, cyNode, nodesToAddToGroup, null, true);
+					}
 				}
 				
 				break;
@@ -227,6 +241,7 @@ abstract class GEXFParserBase {
 					break;
 				}
 			case XMLStreamConstants.START_ELEMENT :
+				System.out.println("Start element...");
 				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFEdge.EDGE)) {
 					List<String> edgeElementAttributes = GetElementAttributes();
 					

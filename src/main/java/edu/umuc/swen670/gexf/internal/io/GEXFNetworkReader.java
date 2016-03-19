@@ -4,6 +4,8 @@ import java.io.InputStream;
 import java.util.List;
 
 import org.cytoscape.event.CyEventHelper;
+import org.cytoscape.group.CyGroupFactory;
+import org.cytoscape.group.CyGroupManager;
 import org.cytoscape.io.read.AbstractCyNetworkReader;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkFactory;
@@ -25,13 +27,16 @@ public class GEXFNetworkReader extends AbstractCyNetworkReader  {
 	private final CyRootNetworkManager _cyRootNetworkManager;
 	private CyNetwork _cyNetwork;
 	private final CyEventHelper _cyEventHelper;
+	private final CyGroupFactory _cyGroupFactory;
+	private final CyGroupManager _cyGroupManager;
 	
 	private List<DelayedVizProp> _vizProps = null;
 
 
 	public GEXFNetworkReader(InputStream inputStream, CyNetworkViewFactory cyNetworkViewFactory,
 			CyNetworkFactory cyNetworkFactory, CyNetworkManager cyNetworkManager,
-			CyRootNetworkManager cyRootNetworkManager, final CyEventHelper cyEventHelper) {
+			CyRootNetworkManager cyRootNetworkManager, final CyEventHelper cyEventHelper,
+			CyGroupFactory cyGroupFactory, CyGroupManager cyGroupManager) {
 		super(inputStream, cyNetworkViewFactory, cyNetworkFactory, cyNetworkManager, cyRootNetworkManager);
 
 		if (inputStream == null) throw new NullPointerException("inputStream cannot be null");
@@ -40,6 +45,8 @@ public class GEXFNetworkReader extends AbstractCyNetworkReader  {
 		if (cyNetworkManager == null) throw new NullPointerException("cyNetworkManager cannot be null");
 		if (cyRootNetworkManager == null) throw new NullPointerException("cyRootNetworkManager cannot be null");
 		if (cyEventHelper == null) throw new NullPointerException("cyRootNetworkManager cannot be null");
+		if (cyGroupFactory == null) throw new NullPointerException("cyGroupFactory cannot be null");
+		if (cyGroupManager == null) throw new NullPointerException("cyGroupManager cannot be null");
 
 		_inputStream = inputStream;
 		_cyNetworkViewFactory = cyNetworkViewFactory;
@@ -47,6 +54,8 @@ public class GEXFNetworkReader extends AbstractCyNetworkReader  {
 		_cyNetworkManager = cyNetworkManager;
 		_cyRootNetworkManager = cyRootNetworkManager;
 		_cyEventHelper = cyEventHelper;
+		_cyGroupFactory = cyGroupFactory;
+		_cyGroupManager = cyGroupManager;
 	}
 
 	@Override
@@ -75,7 +84,7 @@ public class GEXFNetworkReader extends AbstractCyNetworkReader  {
 
 		
 		GEXFParser gexfParser = new GEXFParser();
-		_vizProps = gexfParser.ParseStream(_inputStream, _cyNetwork);
+		_vizProps = gexfParser.ParseStream(_inputStream, _cyNetwork, _cyGroupFactory);
 
 
 		monitor.setStatusMessage("Add network");

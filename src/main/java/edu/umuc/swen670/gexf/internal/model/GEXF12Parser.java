@@ -9,14 +9,15 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
+import org.cytoscape.group.CyGroupFactory;
 import org.cytoscape.model.CyNetwork;
 
 import edu.umuc.swen670.gexf.internal.io.DelayedVizProp;
 
 public class GEXF12Parser extends GEXFParserBase {
 	
-	public GEXF12Parser(XMLStreamReader xmlReader, CyNetwork cyNetwork, String version) {
-		super(xmlReader, cyNetwork, version);
+	public GEXF12Parser(XMLStreamReader xmlReader, CyNetwork cyNetwork, String version, CyGroupFactory cyGroupFactory) {
+		super(xmlReader, cyNetwork, version, cyGroupFactory);
 	}
 	
 	@Override
@@ -60,7 +61,7 @@ public class GEXF12Parser extends GEXFParserBase {
 					}
 				}
 				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFNode.NODES)) {
-					ParseNode(null);
+					ParseNodes(null);
 				}
 				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFEdge.EDGES)) {
 					ParseEdges(defaultEdgeType);
