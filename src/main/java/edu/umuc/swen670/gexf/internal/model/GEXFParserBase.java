@@ -49,7 +49,9 @@ abstract class GEXFParserBase {
 				
 		List<String> attributes = GetElementAttributes();
 		if(attributes.contains(GEXFMeta.LASTMODIFIEDDATE)) {
-			cyTable.createColumn(GEXFMeta.LASTMODIFIEDDATE, String.class, false);
+			if(cyTable.getColumn(GEXFMeta.LASTMODIFIEDDATE)==null) {
+				cyTable.createColumn(GEXFMeta.LASTMODIFIEDDATE, String.class, false);
+			}
 			cyRow.set(GEXFMeta.LASTMODIFIEDDATE, _xmlReader.getAttributeValue(null, GEXFMeta.LASTMODIFIEDDATE).trim());
 		}
 		
@@ -67,16 +69,30 @@ abstract class GEXFParserBase {
 						_xmlReader.getLocalName().equalsIgnoreCase(GEXFMeta.DESCRIPTION) || 
 						_xmlReader.getLocalName().equalsIgnoreCase(GEXFMeta.KEYWORDS)) {
 					
-					cyTable.createColumn(_xmlReader.getLocalName().trim().toLowerCase(), String.class, false);
-					cyRow.set(_xmlReader.getLocalName().trim().toLowerCase(), tagContent.trim());
+					if(cyTable.getColumn(_xmlReader.getLocalName().trim().toLowerCase())==null) {
+						cyTable.createColumn(_xmlReader.getLocalName().trim().toLowerCase(), String.class, false);
+					}
+					if(tagContent!=null) {cyRow.set(_xmlReader.getLocalName().trim().toLowerCase(), tagContent.trim());}
+					
+					tagContent = null;
 					
 					break;
 				}
 				else {
 					throw new InvalidClassException(_xmlReader.getLocalName().trim());
 				}
+			case XMLStreamConstants.START_ELEMENT :
+				if(_xmlReader.getLocalName().trim().equalsIgnoreCase(GEXFMeta.CREATOR) || 
+						_xmlReader.getLocalName().equalsIgnoreCase(GEXFMeta.DESCRIPTION) || 
+						_xmlReader.getLocalName().equalsIgnoreCase(GEXFMeta.KEYWORDS)) {
+					//this will be null in cases where the value is contained in the character stream
+					tagContent = _xmlReader.getAttributeValue(null, "text");
+				}
+				break;
 			case XMLStreamConstants.CHARACTERS :
-				tagContent = _xmlReader.getText();
+				if(_xmlReader.getText().trim().length() > 0) {
+					tagContent = _xmlReader.getText();
+				}
 				break;
 			}
 		}
@@ -110,15 +126,16 @@ abstract class GEXFParserBase {
 				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFAttribute.ATTRIBUTE)) {
 					xId = _xmlReader.getAttributeValue(null, GEXFAttribute.ID).trim();
 					xTitle = _xmlReader.getAttributeValue(null, GEXFAttribute.TITLE).trim();
-					xType =_xmlReader.getAttributeValue(null, GEXFAttribute.TYPE).trim();
+					xType = _xmlReader.getAttributeValue(null, GEXFAttribute.TYPE).trim();
 				}
 				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFAttribute.DEFAULT)) {
 					hasDefault = true;
+					xDefault = _xmlReader.getAttributeValue(null, "text");
 				}
 				break;
 			case XMLStreamConstants.CHARACTERS :
 				if(hasDefault && xDefault == null) {
-					xDefault = _xmlReader.getText().trim();
+					xDefault = _xmlReader.getText();
 				}
 				break;
 			case XMLStreamConstants.END_ELEMENT :
@@ -128,20 +145,22 @@ abstract class GEXFParserBase {
 				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFAttribute.ATTRIBUTE)) {
 					Class type = GetClass(xType);
 					
-					if(!hasDefault) {
-						if(!type.isArray()) {
-							cyTable.createColumn(xTitle, type, false);
+					if(cyTable.getColumn(xTitle)==null) {
+						if(!hasDefault) {
+							if(!type.isArray()) {
+								cyTable.createColumn(xTitle, type, false);
+							}
+							else {
+								cyTable.createListColumn(xTitle, type.getComponentType(), false);
+							}
 						}
 						else {
-							cyTable.createListColumn(xTitle, type.getComponentType(), false);
-						}
-					}
-					else {
-						if(!type.isArray()) {
-							cyTable.createColumn(xTitle, type, false, GenericParse(xDefault, type));
-						}
-						else {
-							cyTable.createListColumn(xTitle, type.getComponentType(), false, ParseArray(xDefault, type.getComponentType()));
+							if(!type.isArray()) {
+								cyTable.createColumn(xTitle, type, false, GenericParse(xDefault.trim(), type));
+							}
+							else {
+								cyTable.createListColumn(xTitle, type.getComponentType(), false, ParseArray(xDefault.trim(), type.getComponentType()));
+							}
 						}
 					}
 					
@@ -254,7 +273,7 @@ abstract class GEXFParserBase {
 				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFEdge.EDGE)) {
 					List<String> edgeElementAttributes = GetElementAttributes();
 					
-					String xId = _xmlReader.getAttributeValue(null, GEXFEdge.ID).trim();
+					//String xId = _xmlReader.getAttributeValue(null, GEXFEdge.ID).trim();
 					String xSource = _xmlReader.getAttributeValue(null, GEXFEdge.SOURCE).trim();
 					String xTarget = _xmlReader.getAttributeValue(null, GEXFEdge.TARGET).trim();
 					String xEdgeType = edgeElementAttributes.contains(GEXFEdge.EDGETYPE) ? _xmlReader.getAttributeValue(null, GEXFEdge.EDGETYPE).trim() : defaultEdgeType;
@@ -296,18 +315,20 @@ abstract class GEXFParserBase {
 				break;
 			case XMLStreamConstants.START_ELEMENT :
 				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFAttribute.ATTVALUE)) {
-					String xFor = _xmlReader.getAttributeValue(null, GEXFAttribute.FOR).trim();
+					String xFor = _xmlReader.getAttributeValue(null, GEXFAttribute.FOR);
+					if(xFor==null) {xFor = _xmlReader.getAttributeValue(null, GEXFAttribute.ID);}
+					xFor = xFor.trim();					
 					String xValue = _xmlReader.getAttributeValue(null, GEXFAttribute.VALUE).trim();
 					
 					Class type = GetClass(attMapping.Type.get(xFor));
 					if(!type.isArray()) {
 						for(CyIdentifiable cyIdentifiable : cyIdentifiables) {
-							_cyNetwork.getRow(cyIdentifiable).set(attMapping.Id.get(xFor), GenericParse(xValue, type));
+							if(cyIdentifiable!=null) {_cyNetwork.getRow(cyIdentifiable).set(attMapping.Id.get(xFor), GenericParse(xValue, type));}
 						}
 					}
 					else {
 						for(CyIdentifiable cyIdentifiable : cyIdentifiables) {
-							_cyNetwork.getRow(cyIdentifiable).set(attMapping.Id.get(xFor), ParseArray(xValue, type));
+							if(cyIdentifiable!=null) {_cyNetwork.getRow(cyIdentifiable).set(attMapping.Id.get(xFor), ParseArray(xValue, type));}
 						}
 					}
 				}
