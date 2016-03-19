@@ -62,8 +62,6 @@ public class GEXFNetworkReader extends AbstractCyNetworkReader  {
 	public CyNetworkView buildCyNetworkView(CyNetwork network) {
 		final CyNetworkView cyNetworkView = _cyNetworkViewFactory.createNetworkView(network);
 		
-		try { Thread.sleep(500); } catch (InterruptedException e) {}
-		
 		_cyEventHelper.flushPayloadEvents();
 		
 		DelayedVizProp.applyAll(cyNetworkView, _vizProps);

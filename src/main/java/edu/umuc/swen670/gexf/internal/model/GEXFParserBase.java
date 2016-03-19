@@ -278,10 +278,10 @@ abstract class GEXFParserBase {
 				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFEdge.EDGE)) {
 					cyEdge = null;
 					cyEdgeReverse = null;
-					break;
 				}
+				
+				break;
 			case XMLStreamConstants.START_ELEMENT :
-				System.out.println("Start element...");
 				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFEdge.EDGE)) {
 					List<String> edgeElementAttributes = GetElementAttributes();
 					
@@ -304,6 +304,16 @@ abstract class GEXFParserBase {
 				}
 				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFAttribute.ATTVALUES)) {
 					ParseAttributes(new CyIdentifiable[] {cyEdge, cyEdgeReverse}, _attEdgeMapping);
+				}
+				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFViz.COLOR)) {
+					int red = Integer.parseInt(_xmlReader.getAttributeValue(null, GEXFViz.RED).trim());
+					int green = Integer.parseInt(_xmlReader.getAttributeValue(null, GEXFViz.GREEN).trim());
+					int blue = Integer.parseInt(_xmlReader.getAttributeValue(null, GEXFViz.BLUE).trim());
+					int alpha = GetElementAttributes().contains(GEXFViz.ALPHA) ? (int)(255 * Float.parseFloat(_xmlReader.getAttributeValue(null, GEXFViz.ALPHA).trim())) : 255;
+					Color color = new Color(red, green, blue, alpha);
+					
+					_vizProps.add(new DelayedVizProp(cyEdge, BasicVisualLexicon.EDGE_UNSELECTED_PAINT, color, true));
+					if(cyEdgeReverse!=null) {_vizProps.add(new DelayedVizProp(cyEdgeReverse, BasicVisualLexicon.EDGE_UNSELECTED_PAINT, color, true));}
 				}
 				
 				break;
