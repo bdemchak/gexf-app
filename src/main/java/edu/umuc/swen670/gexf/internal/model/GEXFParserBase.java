@@ -19,7 +19,9 @@ import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
+import org.cytoscape.view.presentation.property.LineTypeVisualProperty;
 import org.cytoscape.view.presentation.property.NodeShapeVisualProperty;
+import org.cytoscape.view.presentation.property.values.LineType;
 import org.cytoscape.view.presentation.property.values.NodeShape;
 
 import edu.umuc.swen670.gexf.internal.io.DelayedVizProp;
@@ -321,6 +323,12 @@ abstract class GEXFParserBase {
 					_vizProps.add(new DelayedVizProp(cyEdge, BasicVisualLexicon.EDGE_WIDTH, value, true));
 					if(cyEdgeReverse!=null) {_vizProps.add(new DelayedVizProp(cyEdgeReverse, BasicVisualLexicon.EDGE_WIDTH, value, true));}
 				}
+				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFViz.SHAPE)) {
+					String value = _xmlReader.getAttributeValue(null, GEXFViz.VALUE).trim();
+					
+					_vizProps.add(new DelayedVizProp(cyEdge, BasicVisualLexicon.EDGE_LINE_TYPE, ConvertEdgeShape(value), true));
+					if(cyEdgeReverse!=null) {_vizProps.add(new DelayedVizProp(cyEdgeReverse, BasicVisualLexicon.EDGE_LINE_TYPE, ConvertEdgeShape(value), true));}
+				}
 				
 				break;
 			}
@@ -465,6 +473,24 @@ abstract class GEXFParserBase {
 		}
 		else {
 			return NodeShapeVisualProperty.ROUND_RECTANGLE;
+		}
+	}
+	
+	protected LineType ConvertEdgeShape(String shape) {
+		if(shape.equalsIgnoreCase(GEXFViz.SOLID)) {
+			return LineTypeVisualProperty.SOLID;
+		}
+		else if(shape.equalsIgnoreCase(GEXFViz.DOTTED)) {
+			return LineTypeVisualProperty.DOT;
+		}
+		else if(shape.equalsIgnoreCase(GEXFViz.DASHED)) {
+			return LineTypeVisualProperty.EQUAL_DASH;
+		}
+		else if(shape.equalsIgnoreCase(GEXFViz.DOUBLE)) {
+			return LineTypeVisualProperty.DASH_DOT;
+		}
+		else {
+			return LineTypeVisualProperty.SOLID;
 		}
 	}
 	
