@@ -209,13 +209,18 @@ abstract class GEXFParserBase {
 				break;
 			case XMLStreamConstants.START_ELEMENT :
 				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFNode.NODE)) {
-					String xLabel = _xmlReader.getAttributeValue(null, GEXFNode.LABEL).trim();
 					String xId = _xmlReader.getAttributeValue(null, GEXFNode.ID).trim();
+					String xLabel = _xmlReader.getAttributeValue(null, GEXFNode.LABEL).trim();
 					
-					cyNode = _cyNetwork.addNode();
+					if(!_idMapping.containsKey(xId)) {
+						cyNode = _cyNetwork.addNode();
+						_idMapping.put(xId, cyNode.getSUID());
+					}
+					else {
+						cyNode = _cyNetwork.getNode(_idMapping.get(xId));
+					}
+					
 					_cyNetwork.getRow(cyNode).set(CyNetwork.NAME, xLabel);
-
-					_idMapping.put(xId, cyNode.getSUID());
 				}
 				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFNode.NODES)) { 
 					ArrayList<CyNode> nodesToAddToGroup = ParseNodes(cyNode);
@@ -292,6 +297,16 @@ abstract class GEXFParserBase {
 					String xTarget = _xmlReader.getAttributeValue(null, GEXFEdge.TARGET).trim();
 					String xEdgeType = edgeElementAttributes.contains(GEXFEdge.EDGETYPE) ? _xmlReader.getAttributeValue(null, GEXFEdge.EDGETYPE).trim() : defaultEdgeType;
 					String xEdgeWeight = edgeElementAttributes.contains(GEXFEdge.WEIGHT) ? _xmlReader.getAttributeValue(null, GEXFEdge.WEIGHT).trim() : "";
+					
+					if(!_idMapping.containsKey(xSource)) {
+						CyNode cyNode = _cyNetwork.addNode();
+						_idMapping.put(xSource, cyNode.getSUID());
+					}
+					
+					if(!_idMapping.containsKey(xTarget)) {
+						CyNode cyNode = _cyNetwork.addNode();
+						_idMapping.put(xTarget, cyNode.getSUID());
+					}
 					
 					cyEdge = _cyNetwork.addEdge(_cyNetwork.getNode(_idMapping.get(xSource)), _cyNetwork.getNode(_idMapping.get(xTarget)), IsDirected(xEdgeType));
 					cyEdgeReverse = IsBiDirectional(xEdgeType) ? _cyNetwork.addEdge(_cyNetwork.getNode(_idMapping.get(xTarget)), _cyNetwork.getNode(_idMapping.get(xSource)), IsDirected(xEdgeType)) : null;
