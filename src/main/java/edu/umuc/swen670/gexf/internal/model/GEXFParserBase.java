@@ -315,6 +315,12 @@ abstract class GEXFParserBase {
 					_vizProps.add(new DelayedVizProp(cyEdge, BasicVisualLexicon.EDGE_UNSELECTED_PAINT, color, true));
 					if(cyEdgeReverse!=null) {_vizProps.add(new DelayedVizProp(cyEdgeReverse, BasicVisualLexicon.EDGE_UNSELECTED_PAINT, color, true));}
 				}
+				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFViz.THICKNESS)) {
+					double value = Double.parseDouble(_xmlReader.getAttributeValue(null, GEXFViz.VALUE).trim());
+					
+					_vizProps.add(new DelayedVizProp(cyEdge, BasicVisualLexicon.EDGE_WIDTH, value, true));
+					if(cyEdgeReverse!=null) {_vizProps.add(new DelayedVizProp(cyEdgeReverse, BasicVisualLexicon.EDGE_WIDTH, value, true));}
+				}
 				
 				break;
 			}
