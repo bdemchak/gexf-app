@@ -7,6 +7,7 @@ public final class GEXFNode {
 	
 	public static final String ID = "id";
 	public static final String LABEL = "label";
+	public static final String PID = "pid";
 	
 	private GEXFNode(){}
 }

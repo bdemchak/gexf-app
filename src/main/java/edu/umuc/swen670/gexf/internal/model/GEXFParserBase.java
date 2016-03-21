@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.io.IOException;
 import java.io.InvalidClassException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -193,6 +194,7 @@ abstract class GEXFParserBase {
 		
 		ArrayList<CyNode> cyNodes = new ArrayList<CyNode>();
 		CyNode cyNode = null;
+		Hashtable<String, ArrayList<CyNode>> parentIdToChildrenLookup = new Hashtable<String, ArrayList<CyNode>>();
 		
 		while(_xmlReader.hasNext()) {
 			int event = _xmlReader.next();
@@ -211,6 +213,10 @@ abstract class GEXFParserBase {
 				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFNode.NODE)) {
 					String xId = _xmlReader.getAttributeValue(null, GEXFNode.ID).trim();
 					String xLabel = _xmlReader.getAttributeValue(null, GEXFNode.LABEL).trim();
+					String xPid = _xmlReader.getAttributeValue(null, GEXFNode.PID);
+					if (xPid != null) {
+						xPid = xPid.trim();
+					}
 					
 					if(!_idMapping.containsKey(xId)) {
 						cyNode = _cyNetwork.addNode();
@@ -219,6 +225,14 @@ abstract class GEXFParserBase {
 					else {
 						cyNode = _cyNetwork.getNode(_idMapping.get(xId));
 					}
+					
+					if(xPid != null) {
+						if(!parentIdToChildrenLookup.containsKey(xPid)) {
+							parentIdToChildrenLookup.put(xPid, new ArrayList<CyNode>());
+						}
+						ArrayList<CyNode> childrenForPid = (ArrayList<CyNode>)parentIdToChildrenLookup.get(xPid);
+						childrenForPid.add(cyNode);
+					}					
 					
 					_cyNetwork.getRow(cyNode).set(CyNetwork.NAME, xLabel);
 				}
@@ -264,6 +278,14 @@ abstract class GEXFParserBase {
 				
 				break;
 			}
+		}
+		
+		Enumeration<String> pidEnumeration = parentIdToChildrenLookup.keys();
+		while(pidEnumeration.hasMoreElements()) {
+			String pid = pidEnumeration.nextElement();
+			CyNode parentNode = _cyNetwork.getNode(_idMapping.get(pid));
+			
+			_cyGroupFactory.createGroup(_cyNetwork, parentNode, parentIdToChildrenLookup.get(pid), null, true);
 		}
 		
 		throw new InvalidClassException("Missing Node tags");

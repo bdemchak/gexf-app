@@ -13,7 +13,7 @@ import org.cytoscape.group.CyGroupManager;
 import org.cytoscape.model.CyNetwork;
 import org.junit.Test;
 
-public class NodeWithChildrenTest extends TestBase {
+public class NodesWithChildrenTest extends TestBase {
 
 	@Test
 	public void ParseEdgeTypeDirectedFile() throws Exception {
