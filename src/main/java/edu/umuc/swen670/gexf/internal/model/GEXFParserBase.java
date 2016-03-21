@@ -202,6 +202,15 @@ abstract class GEXFParserBase {
 			switch(event) {
 			case XMLStreamConstants.END_ELEMENT :
 				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFNode.NODES)) {
+					if (cyNodeParent == null) {
+						Enumeration<String> pidEnumeration = parentIdToChildrenLookup.keys();
+						while(pidEnumeration.hasMoreElements()) {
+							String pid = pidEnumeration.nextElement();
+							CyNode parentNode = _cyNetwork.getNode(_idMapping.get(pid));
+							
+							_cyGroupFactory.createGroup(_cyNetwork, parentNode, parentIdToChildrenLookup.get(pid), null, true);
+						}
+					}
 					return cyNodes;
 				}
 				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFNode.NODE)) {
@@ -278,14 +287,6 @@ abstract class GEXFParserBase {
 				
 				break;
 			}
-		}
-		
-		Enumeration<String> pidEnumeration = parentIdToChildrenLookup.keys();
-		while(pidEnumeration.hasMoreElements()) {
-			String pid = pidEnumeration.nextElement();
-			CyNode parentNode = _cyNetwork.getNode(_idMapping.get(pid));
-			
-			_cyGroupFactory.createGroup(_cyNetwork, parentNode, parentIdToChildrenLookup.get(pid), null, true);
 		}
 		
 		throw new InvalidClassException("Missing Node tags");
