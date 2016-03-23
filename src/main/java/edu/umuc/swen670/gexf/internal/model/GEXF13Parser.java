@@ -11,14 +11,15 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 import org.cytoscape.group.CyGroupFactory;
+import org.cytoscape.group.CyGroupManager;
 import org.cytoscape.model.CyNetwork;
 
 import edu.umuc.swen670.gexf.internal.io.DelayedVizProp;
 
 public class GEXF13Parser extends GEXFParserBase {
 
-	public GEXF13Parser(XMLStreamReader xmlReader, CyNetwork cyNetwork, String version, CyGroupFactory cyGroupFactory) {
-		super(xmlReader, cyNetwork, version, cyGroupFactory);
+	public GEXF13Parser(XMLStreamReader xmlReader, CyNetwork cyNetwork, String version, CyGroupFactory cyGroupFactory, CyGroupManager cyGroupManager) {
+		super(xmlReader, cyNetwork, version, cyGroupFactory, cyGroupManager);
 	}
 
 	@Override

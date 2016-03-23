@@ -82,7 +82,7 @@ public class GEXFNetworkReader extends AbstractCyNetworkReader  {
 
 		
 		GEXFParser gexfParser = new GEXFParser();
-		_vizProps = gexfParser.ParseStream(_inputStream, _cyNetwork, _cyGroupFactory);
+		_vizProps = gexfParser.ParseStream(_inputStream, _cyNetwork, _cyGroupFactory, _cyGroupManager);
 
 
 		monitor.setStatusMessage("Add network");

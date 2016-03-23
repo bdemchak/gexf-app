@@ -20,6 +20,10 @@
 			</node>
 		</nodes>
 		<edges>
+			<edge id="0" source="b" target="e" />
+			<edge id="1" source="c" target="d" />
+			<edge id="2" source="g" target="b" />
+			<edge id="3" source="f" target="a" />
 		</edges>
 	</graph>
 </gexf>
