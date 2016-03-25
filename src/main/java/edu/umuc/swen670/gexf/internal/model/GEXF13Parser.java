@@ -37,6 +37,8 @@ public class GEXF13Parser extends GEXFParserBase {
 			switch(event) {
 			case XMLStreamConstants.END_ELEMENT :
 				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFGraph.GRAPH)) {
+					CreateGroups();
+					
 					return _vizProps;
 				}
 			case XMLStreamConstants.START_ELEMENT :

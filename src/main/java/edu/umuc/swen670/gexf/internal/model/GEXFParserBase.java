@@ -38,7 +38,6 @@ abstract class GEXFParserBase {
 	protected CyGroupManager _cyGroupManager = null;
 	
 	protected Hashtable<String, Long> _idMapping = new Hashtable<String, Long>();
-	protected Hashtable<String, ArrayList<CyNode>> _parentIdToChildrenNodeLookup = new Hashtable<String, ArrayList<CyNode>>();
 	protected Hashtable<String, ArrayList<String>> _parentIdToChildrenIdLookup = new Hashtable<String, ArrayList<String>>();
 	protected Hashtable<String, ArrayList<CyEdge>> _sourceNodeIdToEdgeLookup = new Hashtable<String, ArrayList<CyEdge>>();
 	protected Hashtable<String, ArrayList<CyEdge>> _targetNodeIdToEdgeLookup = new Hashtable<String, ArrayList<CyEdge>>();
@@ -205,24 +204,12 @@ abstract class GEXFParserBase {
 		CyNode cyNode = null;
 		String cyNodeId = null;
 		
-//		Hashtable<String, ArrayList<CyNode>> parentIdToChildrenLookup = new Hashtable<String, ArrayList<CyNode>>();
-		
 		while(_xmlReader.hasNext()) {
 			int event = _xmlReader.next();
 
 			switch(event) {
 			case XMLStreamConstants.END_ELEMENT :
 				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFNode.NODES)) {
-//					if (cyNodeParent == null) {
-//						Enumeration<String> pidEnumeration = parentIdToChildrenLookup.keys();
-//						while(pidEnumeration.hasMoreElements()) {
-//							String pid = pidEnumeration.nextElement();
-//							CyNode parentNode = _cyNetwork.getNode(_idMapping.get(pid));
-//							
-//							CyGroup newGroup = _cyGroupFactory.createGroup(_cyNetwork, parentNode, parentIdToChildrenLookup.get(pid), null, true);
-//							_cyGroupManager.addGroup(newGroup);
-//						}
-//					}
 					return cyNodeIds;
 				}
 				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFNode.NODE)) {
@@ -251,14 +238,9 @@ abstract class GEXFParserBase {
 					cyNodeId = xId;
 					
 					if(xPid != null) {
-						if(!_parentIdToChildrenNodeLookup.containsKey(xPid)) {
-							_parentIdToChildrenNodeLookup.put(xPid, new ArrayList<CyNode>());
-						}
 						if(!_parentIdToChildrenIdLookup.containsKey(xPid)) {
 							_parentIdToChildrenIdLookup.put(xPid, new ArrayList<String>());
 						}
-						ArrayList<CyNode> childrenForPid = (ArrayList<CyNode>)_parentIdToChildrenNodeLookup.get(xPid);
-						childrenForPid.add(cyNode);
 						
 						ArrayList<String> childrenIdsForPid = (ArrayList<String>)_parentIdToChildrenIdLookup.get(xPid);
 						childrenIdsForPid.add(xId);
@@ -268,13 +250,7 @@ abstract class GEXFParserBase {
 				}
 				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFNode.NODES)) { 
 					ArrayList<String> nodesToAddToGroup = ParseNodes(cyNode);
-					//_parentIdToChildrenNodeLookup.put(cyNodeId, nodesToAddToGroup);
 					_parentIdToChildrenIdLookup.put(cyNodeId, nodesToAddToGroup);
-					
-//					if (cyNode != null) {
-//						CyGroup newGroup = _cyGroupFactory.createGroup(_cyNetwork, cyNode, nodesToAddToGroup, null, true);
-//						_cyGroupManager.addGroup(newGroup);
-//					}
 				}
 				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFAttribute.ATTVALUES)) {
 					ParseAttributes(new CyIdentifiable[] {cyNode}, _attNodeMapping);
@@ -328,37 +304,31 @@ abstract class GEXFParserBase {
 			switch(event) {
 			case XMLStreamConstants.END_ELEMENT :
 				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFEdge.EDGES)) {
-					Enumeration<String> pidEnumeration = _parentIdToChildrenIdLookup.keys();//_parentIdToChildrenNodeLookup.keys();
-					while(pidEnumeration.hasMoreElements()) {
-						String pid = pidEnumeration.nextElement();
-						CyNode parentNode = _cyNetwork.getNode(_idMapping.get(pid));
-						
-						ArrayList<CyNode> allDescendantsOfNode = getImmediateDescendantsOfCyNodeById(pid);
-						//ArrayList<CyNode> allDescendantsOfNode = getDescendantsOfCyNodeById(pid);
-						
-						ArrayList<CyEdge> sourceEdgeList = _sourceNodeIdToEdgeLookup.get(pid);
-//						ArrayList<CyEdge> targetEdgeList = _targetNodeIdToEdgeLookup.get(pid);
-						ArrayList<CyEdge> combinedEdgeList = new ArrayList<CyEdge>();
+//					Enumeration<String> pidEnumeration = _parentIdToChildrenIdLookup.keys();
+//					while(pidEnumeration.hasMoreElements()) {
+//						String pid = pidEnumeration.nextElement();
+//						CyNode parentNode = _cyNetwork.getNode(_idMapping.get(pid));
+//						
+//						ArrayList<CyNode> allDescendantsOfNode = getImmediateDescendantsOfCyNodeById(pid);
+//						//ArrayList<CyNode> allDescendantsOfNode = getDescendantsOfCyNodeById(pid);
+//						
+//						ArrayList<CyEdge> sourceEdgeList = _sourceNodeIdToEdgeLookup.get(pid);
+//						ArrayList<CyEdge> edgesInGroupList = new ArrayList<CyEdge>();
+//
 //						if (sourceEdgeList != null) {
-//							combinedEdgeList.addAll(sourceEdgeList);
+//							for(int i=0; i<sourceEdgeList.size(); i++) {
+//								CyEdge edge = sourceEdgeList.get(i);
+//								CyNode targetNode = edge.getTarget();
+//								if (allDescendantsOfNode.contains(targetNode)) {
+//									edgesInGroupList.add(edge);
+//								}
+//							}
 //						}
-//						if (targetEdgeList != null) {
-//							combinedEdgeList.addAll(targetEdgeList);
-//						}
-						if (sourceEdgeList != null) {
-							for(int i=0; i<sourceEdgeList.size(); i++) {
-								CyEdge edge = sourceEdgeList.get(i);
-								CyNode targetNode = edge.getTarget();
-								if (allDescendantsOfNode.contains(targetNode)) {
-									combinedEdgeList.add(edge);
-								}
-							}
-						}
-						
-						CyGroup newGroup = _cyGroupFactory.createGroup(_cyNetwork, parentNode, allDescendantsOfNode, null, true);
-						//CyGroup newGroup = _cyGroupFactory.createGroup(_cyNetwork, parentNode, allDescendantsOfNode, combinedEdgeList, true);
-						_cyGroupManager.addGroup(newGroup);
-					}
+//						
+//						CyGroup newGroup = _cyGroupFactory.createGroup(_cyNetwork, parentNode, allDescendantsOfNode, null, true);
+//						//CyGroup newGroup = _cyGroupFactory.createGroup(_cyNetwork, parentNode, allDescendantsOfNode, edgesInGroupList, true);
+//						_cyGroupManager.addGroup(newGroup);
+//					}
 					
 					return;
 				}
@@ -616,34 +586,6 @@ abstract class GEXFParserBase {
 		}
 	}
 	
-//	protected void AddCyEdgeToGroupIfAble(CyEdge edgeToAdd) {
-//		if (edgeToAdd == null) {
-//			return;
-//		}
-//		
-//		ArrayList<CyEdge> tempEdgeList = new ArrayList<CyEdge>();
-//		tempEdgeList.add(edgeToAdd);
-//		
-//		CyNode sourceNode = edgeToAdd.getSource();
-//		CyNode targetNode = edgeToAdd.getTarget();
-//		
-//		CyGroup sourceNodeGroup = _cyGroupManager.getGroup(sourceNode, _cyNetwork);
-//		CyGroup targetNodeGroup = _cyGroupManager.getGroup(targetNode, _cyNetwork);
-//		
-////		if (sourceNodeGroup != null && targetNodeGroup != null && sourceNodeGroup.getGroupNode().getSUID() == targetNodeGroup.getGroupNode().getSUID()) {
-////			ArrayList<CyEdge> tempEdgeList = new ArrayList<CyEdge>();
-////			tempEdgeList.add(edgeToAdd);
-////			sourceNodeGroup.addEdges(tempEdgeList);
-////		}
-//		if (sourceNodeGroup != null) {
-//			sourceNodeGroup.addEdges(tempEdgeList);
-//		}
-//		
-//		if (targetNodeGroup != null) {
-//			targetNodeGroup.addEdges(tempEdgeList);
-//		}
-//	}
-	
 	protected ArrayList<CyNode> getDescendantsOfCyNodeById(String pid) {
 		ArrayList<CyNode> result = new ArrayList<CyNode>();
 		if (!_parentIdToChildrenIdLookup.containsKey(pid)) {
@@ -672,6 +614,34 @@ abstract class GEXFParserBase {
 			result.add(_cyNetwork.getNode(_idMapping.get(childIds.get(i))));
 		}
 		return result;
+	}
+	
+	protected void CreateGroups() {
+		Enumeration<String> pidEnumeration = _parentIdToChildrenIdLookup.keys();
+		while(pidEnumeration.hasMoreElements()) {
+			String pid = pidEnumeration.nextElement();
+			CyNode parentNode = _cyNetwork.getNode(_idMapping.get(pid));
+			
+			ArrayList<CyNode> allDescendantsOfNode = getImmediateDescendantsOfCyNodeById(pid);
+			//ArrayList<CyNode> allDescendantsOfNode = getDescendantsOfCyNodeById(pid);
+			
+			ArrayList<CyEdge> sourceEdgeList = _sourceNodeIdToEdgeLookup.get(pid);
+			ArrayList<CyEdge> edgesInGroupList = new ArrayList<CyEdge>();
+
+			if (sourceEdgeList != null) {
+				for(int i=0; i<sourceEdgeList.size(); i++) {
+					CyEdge edge = sourceEdgeList.get(i);
+					CyNode targetNode = edge.getTarget();
+					if (allDescendantsOfNode.contains(targetNode)) {
+						edgesInGroupList.add(edge);
+					}
+				}
+			}
+			
+			CyGroup newGroup = _cyGroupFactory.createGroup(_cyNetwork, parentNode, allDescendantsOfNode, null, true);
+			//CyGroup newGroup = _cyGroupFactory.createGroup(_cyNetwork, parentNode, allDescendantsOfNode, edgesInGroupList, true);
+			_cyGroupManager.addGroup(newGroup);
+		}
 	}
 	
 	protected abstract Boolean IsDirected(String direction);
