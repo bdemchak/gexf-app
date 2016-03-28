@@ -279,7 +279,7 @@ abstract class GEXFParserBase {
 						int red = Integer.parseInt(_xmlReader.getAttributeValue(null, GEXFViz.RED).trim());
 						int green = Integer.parseInt(_xmlReader.getAttributeValue(null, GEXFViz.GREEN).trim());
 						int blue = Integer.parseInt(_xmlReader.getAttributeValue(null, GEXFViz.BLUE).trim());
-						int alpha = GetElementAttributes().contains(GEXFViz.ALPHA) ? (int)(255 * Float.parseFloat(_xmlReader.getAttributeValue(null, GEXFViz.ALPHA).trim())) : 255;
+						int alpha = elementAttributes.contains(GEXFViz.ALPHA) ? (int)(255 * Float.parseFloat(_xmlReader.getAttributeValue(null, GEXFViz.ALPHA).trim())) : 255;
 						color = new Color(red, green, blue, alpha);
 					}
 					
@@ -379,7 +379,7 @@ abstract class GEXFParserBase {
 						int red = Integer.parseInt(_xmlReader.getAttributeValue(null, GEXFViz.RED).trim());
 						int green = Integer.parseInt(_xmlReader.getAttributeValue(null, GEXFViz.GREEN).trim());
 						int blue = Integer.parseInt(_xmlReader.getAttributeValue(null, GEXFViz.BLUE).trim());
-						int alpha = GetElementAttributes().contains(GEXFViz.ALPHA) ? (int)(255 * Float.parseFloat(_xmlReader.getAttributeValue(null, GEXFViz.ALPHA).trim())) : 255;
+						int alpha = elementAttributes.contains(GEXFViz.ALPHA) ? (int)(255 * Float.parseFloat(_xmlReader.getAttributeValue(null, GEXFViz.ALPHA).trim())) : 255;
 						color = new Color(red, green, blue);
 					}
 					
