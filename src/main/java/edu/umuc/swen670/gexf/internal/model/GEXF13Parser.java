@@ -30,6 +30,8 @@ public class GEXF13Parser extends GEXFParserBase {
 		_cyNetwork.getDefaultEdgeTable().createColumn(GEXFEdge.EDGETYPE, String.class, true);
 		_cyNetwork.getDefaultEdgeTable().createColumn(GEXFEdge.WEIGHT, Double.class, true);
 		
+		SetupVisualMapping();
+		
 		while(_xmlReader.hasNext()) {
 			int event = _xmlReader.next();
 

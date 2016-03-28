@@ -19,11 +19,8 @@ import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
-import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.cytoscape.view.presentation.property.LineTypeVisualProperty;
 import org.cytoscape.view.presentation.property.NodeShapeVisualProperty;
-import org.cytoscape.view.presentation.property.values.LineType;
-import org.cytoscape.view.presentation.property.values.NodeShape;
 
 import edu.umuc.swen670.gexf.internal.io.DelayedVizProp;
 
@@ -48,6 +45,23 @@ abstract class GEXFParserBase {
 	}
 	
 	public abstract List<DelayedVizProp> ParseStream() throws IOException, XMLStreamException;
+	
+	protected void SetupVisualMapping() {
+		//nodes
+		_cyNetwork.getDefaultNodeTable().createColumn(GEXFViz.ATT_X, Double.class, false);
+		_cyNetwork.getDefaultNodeTable().createColumn(GEXFViz.ATT_Y, Double.class, false);
+		_cyNetwork.getDefaultNodeTable().createColumn(GEXFViz.ATT_Z, Double.class, false);
+		_cyNetwork.getDefaultNodeTable().createColumn(GEXFViz.ATT_SHAPE, String.class, false);
+		_cyNetwork.getDefaultNodeTable().createColumn(GEXFViz.ATT_COLOR, String.class, false);
+		_cyNetwork.getDefaultNodeTable().createColumn(GEXFViz.ATT_TRANSPARENCY, Integer.class, false);
+		_cyNetwork.getDefaultNodeTable().createColumn(GEXFViz.ATT_SIZE, Double.class, false);
+		
+		//edges
+		_cyNetwork.getDefaultEdgeTable().createColumn(GEXFViz.ATT_SHAPE, String.class, false);
+		_cyNetwork.getDefaultEdgeTable().createColumn(GEXFViz.ATT_COLOR, String.class, false);
+		_cyNetwork.getDefaultEdgeTable().createColumn(GEXFViz.ATT_TRANSPARENCY, Integer.class, false);
+		_cyNetwork.getDefaultEdgeTable().createColumn(GEXFViz.ATT_THICKNESS, Double.class, false);
+	}
 	
 	protected void ParseMeta() throws InvalidClassException, XMLStreamException {
 		CyTable cyTable = _cyNetwork.getDefaultNetworkTable();
@@ -259,9 +273,10 @@ abstract class GEXFParserBase {
 					int green = Integer.parseInt(_xmlReader.getAttributeValue(null, GEXFViz.GREEN).trim());
 					int blue = Integer.parseInt(_xmlReader.getAttributeValue(null, GEXFViz.BLUE).trim());
 					int alpha = GetElementAttributes().contains(GEXFViz.ALPHA) ? (int)(255 * Float.parseFloat(_xmlReader.getAttributeValue(null, GEXFViz.ALPHA).trim())) : 255;
-					Color color = new Color(red, green, blue, alpha);
+					Color color = new Color(red, green, blue);
 					
-					_vizProps.add(new DelayedVizProp(cyNode, BasicVisualLexicon.NODE_FILL_COLOR, color, true));
+					_cyNetwork.getRow(cyNode).set(GEXFViz.ATT_COLOR, ConvertColorToHex(color));
+					_cyNetwork.getRow(cyNode).set(GEXFViz.ATT_TRANSPARENCY, alpha);
 				}
 				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFViz.POSITION)) {
 					List<String> elementAttributes = GetElementAttributes();
@@ -270,19 +285,19 @@ abstract class GEXFParserBase {
 					double y = elementAttributes.contains(GEXFViz.Y) ? -Double.parseDouble(_xmlReader.getAttributeValue(null, GEXFViz.Y).trim()) : 0.0d;
 					double z = elementAttributes.contains(GEXFViz.Z) ? Double.parseDouble(_xmlReader.getAttributeValue(null, GEXFViz.Z).trim()) : 0.0d;
 					
-					if(elementAttributes.contains(GEXFViz.X)) {_vizProps.add(new DelayedVizProp(cyNode, BasicVisualLexicon.NODE_X_LOCATION, x, false));}
-					if(elementAttributes.contains(GEXFViz.Y)) {_vizProps.add(new DelayedVizProp(cyNode, BasicVisualLexicon.NODE_Y_LOCATION, y, false));}
-					if(elementAttributes.contains(GEXFViz.Z)) {_vizProps.add(new DelayedVizProp(cyNode, BasicVisualLexicon.NODE_Z_LOCATION, z, false));}
+					_cyNetwork.getRow(cyNode).set(GEXFViz.ATT_X, x);
+					_cyNetwork.getRow(cyNode).set(GEXFViz.ATT_Y, y);
+					_cyNetwork.getRow(cyNode).set(GEXFViz.ATT_Z, z);
 				}
 				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFViz.SIZE)) {
 					double value = Double.parseDouble(_xmlReader.getAttributeValue(null, GEXFViz.VALUE).trim());
 					
-					_vizProps.add(new DelayedVizProp(cyNode, BasicVisualLexicon.NODE_SIZE, value, true));
+					_cyNetwork.getRow(cyNode).set(GEXFViz.ATT_SIZE, value);
 				}
 				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFViz.SHAPE)) {
 					String value = _xmlReader.getAttributeValue(null, GEXFViz.VALUE).trim();
 					
-					_vizProps.add(new DelayedVizProp(cyNode, BasicVisualLexicon.NODE_SHAPE, ConvertNodeShape(value), true));
+					_cyNetwork.getRow(cyNode).set(GEXFViz.ATT_SHAPE, ConvertNodeShape(value));
 				}
 				
 				break;
@@ -350,22 +365,25 @@ abstract class GEXFParserBase {
 					int green = Integer.parseInt(_xmlReader.getAttributeValue(null, GEXFViz.GREEN).trim());
 					int blue = Integer.parseInt(_xmlReader.getAttributeValue(null, GEXFViz.BLUE).trim());
 					int alpha = GetElementAttributes().contains(GEXFViz.ALPHA) ? (int)(255 * Float.parseFloat(_xmlReader.getAttributeValue(null, GEXFViz.ALPHA).trim())) : 255;
-					Color color = new Color(red, green, blue, alpha);
+					Color color = new Color(red, green, blue);
 					
-					_vizProps.add(new DelayedVizProp(cyEdge, BasicVisualLexicon.EDGE_UNSELECTED_PAINT, color, true));
-					if(cyEdgeReverse!=null) {_vizProps.add(new DelayedVizProp(cyEdgeReverse, BasicVisualLexicon.EDGE_UNSELECTED_PAINT, color, true));}
+					_cyNetwork.getRow(cyEdge).set(GEXFViz.ATT_COLOR, ConvertColorToHex(color));
+					_cyNetwork.getRow(cyEdge).set(GEXFViz.ATT_TRANSPARENCY, alpha);
+					
+					if(cyEdgeReverse!=null) _cyNetwork.getRow(cyEdgeReverse).set(GEXFViz.ATT_SHAPE, ConvertColorToHex(color));
+					if(cyEdgeReverse!=null) _cyNetwork.getRow(cyEdgeReverse).set(GEXFViz.ATT_TRANSPARENCY, alpha);
 				}
 				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFViz.THICKNESS)) {
 					double value = Double.parseDouble(_xmlReader.getAttributeValue(null, GEXFViz.VALUE).trim());
 					
-					_vizProps.add(new DelayedVizProp(cyEdge, BasicVisualLexicon.EDGE_WIDTH, value, true));
-					if(cyEdgeReverse!=null) {_vizProps.add(new DelayedVizProp(cyEdgeReverse, BasicVisualLexicon.EDGE_WIDTH, value, true));}
+					_cyNetwork.getRow(cyEdge).set(GEXFViz.ATT_THICKNESS, value);
+					if(cyEdgeReverse!=null) _cyNetwork.getRow(cyEdgeReverse).set(GEXFViz.ATT_THICKNESS, value);
 				}
 				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFViz.SHAPE)) {
 					String value = _xmlReader.getAttributeValue(null, GEXFViz.VALUE).trim();
-					
-					_vizProps.add(new DelayedVizProp(cyEdge, BasicVisualLexicon.EDGE_LINE_TYPE, ConvertEdgeShape(value), true));
-					if(cyEdgeReverse!=null) {_vizProps.add(new DelayedVizProp(cyEdgeReverse, BasicVisualLexicon.EDGE_LINE_TYPE, ConvertEdgeShape(value), true));}
+
+					_cyNetwork.getRow(cyEdge).set(GEXFViz.ATT_SHAPE, ConvertEdgeShape(value));
+					if(cyEdgeReverse!=null) _cyNetwork.getRow(cyEdgeReverse).set(GEXFViz.ATT_SHAPE, ConvertEdgeShape(value));
 				}
 				
 				break;
@@ -493,46 +511,54 @@ abstract class GEXFParserBase {
 		return attributes;
 	}
 	
-	protected NodeShape ConvertNodeShape(String shape) {
+	protected String ConvertNodeShape(String shape) {
 		if(shape.equalsIgnoreCase(GEXFViz.DISC)) {
-			return NodeShapeVisualProperty.ELLIPSE;
+			return NodeShapeVisualProperty.ELLIPSE.getSerializableString();
 		}
 		else if(shape.equalsIgnoreCase(GEXFViz.SQUARE)) {
-			return NodeShapeVisualProperty.RECTANGLE;
+			return NodeShapeVisualProperty.RECTANGLE.getSerializableString();
 		}
 		else if(shape.equalsIgnoreCase(GEXFViz.TRIANGLE)) {
-			return NodeShapeVisualProperty.TRIANGLE;
+			return NodeShapeVisualProperty.TRIANGLE.getSerializableString();
 		}
 		else if(shape.equalsIgnoreCase(GEXFViz.DIAMOND)) {
-			return NodeShapeVisualProperty.DIAMOND;
+			return NodeShapeVisualProperty.DIAMOND.getSerializableString();
 		}
 		else if(shape.equalsIgnoreCase(GEXFViz.IMAGE)) {
-			return NodeShapeVisualProperty.OCTAGON;
+			return NodeShapeVisualProperty.OCTAGON.getSerializableString();
 		}
 		else {
-			return NodeShapeVisualProperty.ROUND_RECTANGLE;
+			return NodeShapeVisualProperty.ELLIPSE.getSerializableString();
 		}
 	}
 	
-	protected LineType ConvertEdgeShape(String shape) {
+	protected String ConvertEdgeShape(String shape) {
 		if(shape.equalsIgnoreCase(GEXFViz.SOLID)) {
-			return LineTypeVisualProperty.SOLID;
+			return LineTypeVisualProperty.SOLID.getSerializableString();
 		}
 		else if(shape.equalsIgnoreCase(GEXFViz.DOTTED)) {
-			return LineTypeVisualProperty.DOT;
+			return LineTypeVisualProperty.DOT.getSerializableString();
 		}
 		else if(shape.equalsIgnoreCase(GEXFViz.DASHED)) {
-			return LineTypeVisualProperty.EQUAL_DASH;
+			return LineTypeVisualProperty.EQUAL_DASH.getSerializableString();
 		}
 		else if(shape.equalsIgnoreCase(GEXFViz.DOUBLE)) {
-			return LineTypeVisualProperty.DASH_DOT;
+			return "PARALLEL_LINES";
 		}
 		else {
-			return LineTypeVisualProperty.SOLID;
+			return LineTypeVisualProperty.SOLID.getSerializableString();
 		}
 	}
 	
 	protected abstract Boolean IsDirected(String direction);
 	
 	protected abstract Boolean IsBiDirectional(String direction);
+	
+	private String ConvertColorToHex(Color color) {
+		String hexColor = Integer.toHexString(color.getRGB() & 0xffffff);
+		  if (hexColor.length() < 6) {
+		    hexColor = "000000".substring(0, 6 - hexColor.length()) + hexColor;
+		  }
+		  return "#" + hexColor;
+	}
 }

@@ -31,4 +31,13 @@ public final class GEXFViz {
 	public static final String DOTTED = "dotted";
 	public static final String DASHED = "dashed";
 	public static final String DOUBLE = "double";
+	
+	public static final String ATT_COLOR = VIZ + "_" + COLOR;
+	public static final String ATT_TRANSPARENCY = VIZ + "_" + "transparency";
+	public static final String ATT_X = VIZ + "_" + X;
+	public static final String ATT_Y = VIZ + "_" + Y;
+	public static final String ATT_Z = VIZ + "_" + Z;
+	public static final String ATT_SIZE = VIZ + "_" + SIZE;
+	public static final String ATT_SHAPE = VIZ + "_" + SHAPE;
+	public static final String ATT_THICKNESS = VIZ + "_" + THICKNESS;
 }

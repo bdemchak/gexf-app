@@ -23,6 +23,8 @@ import org.cytoscape.model.CyTable;
 import org.cytoscape.model.NetworkTestSupport;
 import org.cytoscape.model.subnetwork.CyRootNetworkManager;
 import org.cytoscape.view.model.CyNetworkViewFactory;
+import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
+import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.work.TaskMonitor;
 
 import edu.umuc.swen670.gexf.internal.model.GEXFMeta;
@@ -37,8 +39,12 @@ public class TestBase {
 		CyEventHelper cyEventHelper = mock(CyEventHelper.class);
 		CyGroupFactory cyGroupFactory = new GroupTestSupport().getGroupFactory();
 		CyGroupManager cyGroupManager = new GroupTestSupport().getGroupManager();
+		VisualMappingFunctionFactory passthroughMapper = mock(VisualMappingFunctionFactory.class);
+		VisualMappingManager visualMappingManager = mock(VisualMappingManager.class);
 		
-		CyNetworkReader reader = new GEXFNetworkReader(stream, cyNetworkViewFactory, cyNetworkFactory, cyNetworkManager, cyRootNetworkManager, cyEventHelper, cyGroupFactory, cyGroupManager);
+		CyNetworkReader reader = new GEXFNetworkReader(stream, cyNetworkViewFactory, cyNetworkFactory, cyNetworkManager, 
+													   cyRootNetworkManager, cyEventHelper, cyGroupFactory, cyGroupManager, 
+													   passthroughMapper, visualMappingManager);
 		
 		TaskMonitor monitor = mock(TaskMonitor.class);
 		
