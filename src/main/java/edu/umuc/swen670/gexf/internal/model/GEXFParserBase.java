@@ -269,14 +269,22 @@ abstract class GEXFParserBase {
 					ParseAttributes(new CyIdentifiable[] {cyNode}, _attNodeMapping);
 				}
 				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFViz.COLOR)) {
-					int red = Integer.parseInt(_xmlReader.getAttributeValue(null, GEXFViz.RED).trim());
-					int green = Integer.parseInt(_xmlReader.getAttributeValue(null, GEXFViz.GREEN).trim());
-					int blue = Integer.parseInt(_xmlReader.getAttributeValue(null, GEXFViz.BLUE).trim());
-					int alpha = GetElementAttributes().contains(GEXFViz.ALPHA) ? (int)(255 * Float.parseFloat(_xmlReader.getAttributeValue(null, GEXFViz.ALPHA).trim())) : 255;
-					Color color = new Color(red, green, blue);
+					List<String> elementAttributes = GetElementAttributes();
+					Color color;
+					
+					if(elementAttributes.contains(GEXFViz.HEX)) {
+						color = Color.decode(_xmlReader.getAttributeValue(null, GEXFViz.HEX).trim());
+					}
+					else {
+						int red = Integer.parseInt(_xmlReader.getAttributeValue(null, GEXFViz.RED).trim());
+						int green = Integer.parseInt(_xmlReader.getAttributeValue(null, GEXFViz.GREEN).trim());
+						int blue = Integer.parseInt(_xmlReader.getAttributeValue(null, GEXFViz.BLUE).trim());
+						int alpha = GetElementAttributes().contains(GEXFViz.ALPHA) ? (int)(255 * Float.parseFloat(_xmlReader.getAttributeValue(null, GEXFViz.ALPHA).trim())) : 255;
+						color = new Color(red, green, blue, alpha);
+					}
 					
 					_cyNetwork.getRow(cyNode).set(GEXFViz.ATT_COLOR, ConvertColorToHex(color));
-					_cyNetwork.getRow(cyNode).set(GEXFViz.ATT_TRANSPARENCY, alpha);
+					_cyNetwork.getRow(cyNode).set(GEXFViz.ATT_TRANSPARENCY, color.getAlpha());
 				}
 				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFViz.POSITION)) {
 					List<String> elementAttributes = GetElementAttributes();
@@ -361,17 +369,25 @@ abstract class GEXFParserBase {
 					ParseAttributes(new CyIdentifiable[] {cyEdge, cyEdgeReverse}, _attEdgeMapping);
 				}
 				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFViz.COLOR)) {
-					int red = Integer.parseInt(_xmlReader.getAttributeValue(null, GEXFViz.RED).trim());
-					int green = Integer.parseInt(_xmlReader.getAttributeValue(null, GEXFViz.GREEN).trim());
-					int blue = Integer.parseInt(_xmlReader.getAttributeValue(null, GEXFViz.BLUE).trim());
-					int alpha = GetElementAttributes().contains(GEXFViz.ALPHA) ? (int)(255 * Float.parseFloat(_xmlReader.getAttributeValue(null, GEXFViz.ALPHA).trim())) : 255;
-					Color color = new Color(red, green, blue);
+					List<String> elementAttributes = GetElementAttributes();
+					Color color;
+					
+					if(elementAttributes.contains(GEXFViz.HEX)) {
+						color = Color.decode(_xmlReader.getAttributeValue(null, GEXFViz.HEX).trim());
+					}
+					else {
+						int red = Integer.parseInt(_xmlReader.getAttributeValue(null, GEXFViz.RED).trim());
+						int green = Integer.parseInt(_xmlReader.getAttributeValue(null, GEXFViz.GREEN).trim());
+						int blue = Integer.parseInt(_xmlReader.getAttributeValue(null, GEXFViz.BLUE).trim());
+						int alpha = GetElementAttributes().contains(GEXFViz.ALPHA) ? (int)(255 * Float.parseFloat(_xmlReader.getAttributeValue(null, GEXFViz.ALPHA).trim())) : 255;
+						color = new Color(red, green, blue);
+					}
 					
 					_cyNetwork.getRow(cyEdge).set(GEXFViz.ATT_COLOR, ConvertColorToHex(color));
-					_cyNetwork.getRow(cyEdge).set(GEXFViz.ATT_TRANSPARENCY, alpha);
+					_cyNetwork.getRow(cyEdge).set(GEXFViz.ATT_TRANSPARENCY, color.getAlpha());
 					
 					if(cyEdgeReverse!=null) _cyNetwork.getRow(cyEdgeReverse).set(GEXFViz.ATT_SHAPE, ConvertColorToHex(color));
-					if(cyEdgeReverse!=null) _cyNetwork.getRow(cyEdgeReverse).set(GEXFViz.ATT_TRANSPARENCY, alpha);
+					if(cyEdgeReverse!=null) _cyNetwork.getRow(cyEdgeReverse).set(GEXFViz.ATT_TRANSPARENCY, color.getAlpha());
 				}
 				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFViz.THICKNESS)) {
 					double value = Double.parseDouble(_xmlReader.getAttributeValue(null, GEXFViz.VALUE).trim());
