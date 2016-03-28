@@ -14,7 +14,6 @@ import org.cytoscape.group.CyGroupManager;
 import org.cytoscape.model.subnetwork.CyRootNetworkManager;
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.view.model.CyNetworkViewFactory;
-import org.cytoscape.view.model.VisualLexicon;
 import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.work.ServiceProperties;
@@ -39,7 +38,6 @@ public class CyActivator extends AbstractCyActivator {
 		final CyGroupManager cyGroupManager = getService(context, CyGroupManager.class);
 		final VisualMappingFunctionFactory passthroughMapper = getService(context, VisualMappingFunctionFactory.class, "(mapping.type=passthrough)");
 		final VisualMappingManager visualMappingManager = getService(context, VisualMappingManager.class);
-		//final VisualLexicon lexicon = cyApplicationManager.getCurrentRenderingEngine().getVisualLexicon();
 
 		//register reader
 		final CyFileFilter gexfFileFilter = new GEXFFileFilter(streamUtil);
