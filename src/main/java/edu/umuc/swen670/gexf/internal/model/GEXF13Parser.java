@@ -13,7 +13,6 @@ import javax.xml.stream.XMLStreamReader;
 import org.cytoscape.group.CyGroupFactory;
 import org.cytoscape.model.CyNetwork;
 
-import edu.umuc.swen670.gexf.internal.io.DelayedVizProp;
 
 public class GEXF13Parser extends GEXFParserBase {
 
@@ -22,7 +21,7 @@ public class GEXF13Parser extends GEXFParserBase {
 	}
 
 	@Override
-	public List<DelayedVizProp> ParseStream() throws IOException, XMLStreamException {
+	public void ParseStream() throws IOException, XMLStreamException {
 		
 		String defaultEdgeType = "";
 		String mode = "";
@@ -38,7 +37,7 @@ public class GEXF13Parser extends GEXFParserBase {
 			switch(event) {
 			case XMLStreamConstants.END_ELEMENT :
 				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFGraph.GRAPH)) {
-					return _vizProps;
+					return;
 				}
 			case XMLStreamConstants.START_ELEMENT :
 				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFMeta.META)) {

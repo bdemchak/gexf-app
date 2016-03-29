@@ -39,8 +39,6 @@ public class GEXFNetworkReader extends AbstractCyNetworkReader  {
 	private final CyGroupManager _cyGroupManager;
 	private final VisualMappingFunctionFactory _passthroughMapper;
 	private final VisualMappingManager _visualMappingManager;
-	
-	private List<DelayedVizProp> _vizProps = null;
 
 
 	public GEXFNetworkReader(InputStream inputStream, CyNetworkViewFactory cyNetworkViewFactory,
@@ -101,9 +99,7 @@ public class GEXFNetworkReader extends AbstractCyNetworkReader  {
 		//https://groups.google.com/forum/#!msg/cytoscape-discuss/lnUhb6T7w5g/7qBedvdjdkUJ
 		//https://groups.google.com/forum/#!topic/cytoscape-discuss/K3w4khYWnXI
         //http://wiki.cytoscape.org/Cytoscape_3/AppDeveloper/Cytoscape_3_App_Cookbook#How_to_use_the_VizMapper_programmatically.3F
-		
-		
-		DelayedVizProp.applyAll(cyNetworkView, _vizProps);
+
 		
 		cyNetworkView.updateView();
 
@@ -121,8 +117,7 @@ public class GEXFNetworkReader extends AbstractCyNetworkReader  {
 
 		
 		GEXFParser gexfParser = new GEXFParser();
-		_vizProps = gexfParser.ParseStream(_inputStream, _cyNetwork, _cyGroupFactory);
-
+		
 
 		monitor.setStatusMessage("Add network");
 		monitor.setProgress(1.00);

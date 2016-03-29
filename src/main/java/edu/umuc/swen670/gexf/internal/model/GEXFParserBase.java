@@ -22,8 +22,6 @@ import org.cytoscape.model.CyTable;
 import org.cytoscape.view.presentation.property.LineTypeVisualProperty;
 import org.cytoscape.view.presentation.property.NodeShapeVisualProperty;
 
-import edu.umuc.swen670.gexf.internal.io.DelayedVizProp;
-
 abstract class GEXFParserBase {
 
 	protected XMLStreamReader _xmlReader = null;
@@ -34,9 +32,7 @@ abstract class GEXFParserBase {
 	protected Hashtable<String, Long> _idMapping = new Hashtable<String, Long>();
 	protected AttributeMapping _attNodeMapping = null;
 	protected AttributeMapping _attEdgeMapping = null;
-	
-	protected List<DelayedVizProp> _vizProps = new ArrayList<DelayedVizProp>();
-	
+		
 	public GEXFParserBase(XMLStreamReader xmlReader, CyNetwork cyNetwork, String version, CyGroupFactory cyGroupFactory) {
 		_xmlReader = xmlReader;
 		_cyNetwork = cyNetwork;
@@ -44,7 +40,7 @@ abstract class GEXFParserBase {
 		_cyGroupFactory = cyGroupFactory;
 	}
 	
-	public abstract List<DelayedVizProp> ParseStream() throws IOException, XMLStreamException;
+	public abstract void ParseStream() throws IOException, XMLStreamException;
 	
 	protected void SetupVisualMapping() {
 		//nodes
