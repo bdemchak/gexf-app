@@ -13,17 +13,13 @@ import org.cytoscape.group.CyGroupFactory;
 import org.cytoscape.group.CyGroupManager;
 import org.cytoscape.model.CyNetwork;
 
-import edu.umuc.swen670.gexf.internal.io.DelayedVizProp;
-
 
 public class GEXFParser {
 
-	public List<DelayedVizProp> ParseStream(InputStream inputStream, CyNetwork cyNetwork, CyGroupFactory cyGroupFactory, CyGroupManager cyGroupManager) throws IOException, XMLStreamException {
+	public void ParseStream(InputStream inputStream, CyNetwork cyNetwork, CyGroupFactory cyGroupFactory, CyGroupManager cyGroupManager) throws IOException, XMLStreamException {
 		XMLInputFactory xmlFactory = XMLInputFactory.newInstance();
 		XMLStreamReader xmlReader = xmlFactory.createXMLStreamReader(inputStream);
-		
-		List<DelayedVizProp> vizProps = null;
-		
+
 		while(xmlReader.hasNext()) {
 			int event = xmlReader.next();
 
@@ -57,11 +53,11 @@ public class GEXFParser {
 						parser = new GEXF13Parser(xmlReader, cyNetwork, version, cyGroupFactory, cyGroupManager);
 					}
 
-					vizProps = parser.ParseStream();
+					parser.ParseStream();
 				}
 			}
 		}
 		
-		return vizProps;
+		return;
 	}
 }

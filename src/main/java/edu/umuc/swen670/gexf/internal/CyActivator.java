@@ -14,6 +14,8 @@ import org.cytoscape.group.CyGroupManager;
 import org.cytoscape.model.subnetwork.CyRootNetworkManager;
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.view.model.CyNetworkViewFactory;
+import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
+import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.work.ServiceProperties;
 import org.osgi.framework.BundleContext;
 
@@ -34,10 +36,15 @@ public class CyActivator extends AbstractCyActivator {
 		final CyEventHelper cyEventHelper = getService(context, CyEventHelper.class);
 		final CyGroupFactory cyGroupFactory = getService(context, CyGroupFactory.class);
 		final CyGroupManager cyGroupManager = getService(context, CyGroupManager.class);
+		final VisualMappingFunctionFactory passthroughMapper = getService(context, VisualMappingFunctionFactory.class, "(mapping.type=passthrough)");
+		final VisualMappingManager visualMappingManager = getService(context, VisualMappingManager.class);
 
 		//register reader
 		final CyFileFilter gexfFileFilter = new GEXFFileFilter(streamUtil);
-		final GEXFNetworkReaderFactory gexfNetworkReaderFactory = new GEXFNetworkReaderFactory(gexfFileFilter, cyNetworkViewFactory, cyNetworkFactory, cyNetworkManager, cyRootNetworkManager, cyEventHelper, cyGroupFactory, cyGroupManager);
+		final GEXFNetworkReaderFactory gexfNetworkReaderFactory = new GEXFNetworkReaderFactory(gexfFileFilter, cyNetworkViewFactory, cyNetworkFactory, 
+																							   cyNetworkManager, cyRootNetworkManager, cyEventHelper, 
+																							   cyGroupFactory, cyGroupManager, passthroughMapper, 
+																							   visualMappingManager);
 		final Properties gexfNetworkReaderFactoryProperties = new Properties();
 		gexfNetworkReaderFactoryProperties.put(ServiceProperties.ID, "GEXFNetworkReaderFactory");
 		registerService(context, gexfNetworkReaderFactory, InputStreamTaskFactory.class, gexfNetworkReaderFactoryProperties);

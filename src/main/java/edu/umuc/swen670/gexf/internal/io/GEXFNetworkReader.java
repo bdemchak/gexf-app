@@ -3,6 +3,7 @@ package edu.umuc.swen670.gexf.internal.io;
 import java.io.InputStream;
 import java.util.List;
 
+
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.group.CyGroupFactory;
 import org.cytoscape.group.CyGroupManager;
@@ -13,10 +14,17 @@ import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.subnetwork.CyRootNetworkManager;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewFactory;
+import org.cytoscape.view.presentation.property.BasicVisualLexicon;
+import org.cytoscape.view.presentation.property.LineTypeVisualProperty;
+import org.cytoscape.view.presentation.property.NodeShapeVisualProperty;
+import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
+import org.cytoscape.view.vizmap.VisualMappingManager;
+import org.cytoscape.view.vizmap.VisualStyle;
 import org.cytoscape.work.TaskMonitor;
 
 
 import edu.umuc.swen670.gexf.internal.model.GEXFParser;
+import edu.umuc.swen670.gexf.internal.model.GEXFViz;
 
 public class GEXFNetworkReader extends AbstractCyNetworkReader  {
 
@@ -29,14 +37,15 @@ public class GEXFNetworkReader extends AbstractCyNetworkReader  {
 	private final CyEventHelper _cyEventHelper;
 	private final CyGroupFactory _cyGroupFactory;
 	private final CyGroupManager _cyGroupManager;
-	
-	private List<DelayedVizProp> _vizProps = null;
+	private final VisualMappingFunctionFactory _passthroughMapper;
+	private final VisualMappingManager _visualMappingManager;
 
 
 	public GEXFNetworkReader(InputStream inputStream, CyNetworkViewFactory cyNetworkViewFactory,
 			CyNetworkFactory cyNetworkFactory, CyNetworkManager cyNetworkManager,
 			CyRootNetworkManager cyRootNetworkManager, final CyEventHelper cyEventHelper,
-			CyGroupFactory cyGroupFactory, CyGroupManager cyGroupManager) {
+			CyGroupFactory cyGroupFactory, CyGroupManager cyGroupManager, final VisualMappingFunctionFactory passthroughMapper, 
+			final VisualMappingManager visualMappingManager) {
 		super(inputStream, cyNetworkViewFactory, cyNetworkFactory, cyNetworkManager, cyRootNetworkManager);
 
 		if (inputStream == null) throw new NullPointerException("inputStream cannot be null");
@@ -56,6 +65,8 @@ public class GEXFNetworkReader extends AbstractCyNetworkReader  {
 		_cyEventHelper = cyEventHelper;
 		_cyGroupFactory = cyGroupFactory;
 		_cyGroupManager = cyGroupManager;
+		_passthroughMapper = passthroughMapper;
+		_visualMappingManager = visualMappingManager;
 	}
 
 	@Override
@@ -64,7 +75,31 @@ public class GEXFNetworkReader extends AbstractCyNetworkReader  {
 		
 		_cyEventHelper.flushPayloadEvents();
 		
-		DelayedVizProp.applyAll(cyNetworkView, _vizProps);
+		VisualStyle style = _visualMappingManager.getVisualStyle(cyNetworkView);
+
+		style.setDefaultValue(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.ELLIPSE);
+		style.setDefaultValue(BasicVisualLexicon.EDGE_LINE_TYPE, LineTypeVisualProperty.SOLID);
+		
+		style.addVisualMappingFunction(_passthroughMapper.createVisualMappingFunction(GEXFViz.ATT_X, Double.class, BasicVisualLexicon.NODE_X_LOCATION));
+		style.addVisualMappingFunction(_passthroughMapper.createVisualMappingFunction(GEXFViz.ATT_Y, Double.class, BasicVisualLexicon.NODE_Y_LOCATION));
+		style.addVisualMappingFunction(_passthroughMapper.createVisualMappingFunction(GEXFViz.ATT_Z, Double.class, BasicVisualLexicon.NODE_Z_LOCATION));
+		style.addVisualMappingFunction(_passthroughMapper.createVisualMappingFunction(GEXFViz.ATT_SHAPE, String.class, BasicVisualLexicon.NODE_SHAPE));
+		style.addVisualMappingFunction(_passthroughMapper.createVisualMappingFunction(GEXFViz.ATT_COLOR, String.class, BasicVisualLexicon.NODE_FILL_COLOR));
+		style.addVisualMappingFunction(_passthroughMapper.createVisualMappingFunction(GEXFViz.ATT_TRANSPARENCY, Integer.class, BasicVisualLexicon.NODE_TRANSPARENCY));
+		style.addVisualMappingFunction(_passthroughMapper.createVisualMappingFunction(GEXFViz.ATT_SIZE, Double.class, BasicVisualLexicon.NODE_WIDTH));
+		style.addVisualMappingFunction(_passthroughMapper.createVisualMappingFunction(GEXFViz.ATT_SIZE, Double.class, BasicVisualLexicon.NODE_HEIGHT));
+		
+        style.addVisualMappingFunction(_passthroughMapper.createVisualMappingFunction(GEXFViz.ATT_SHAPE, String.class, BasicVisualLexicon.EDGE_LINE_TYPE));
+        style.addVisualMappingFunction(_passthroughMapper.createVisualMappingFunction(GEXFViz.ATT_COLOR, String.class, BasicVisualLexicon.EDGE_STROKE_UNSELECTED_PAINT));
+		style.addVisualMappingFunction(_passthroughMapper.createVisualMappingFunction(GEXFViz.ATT_TRANSPARENCY, Integer.class, BasicVisualLexicon.EDGE_TRANSPARENCY));
+		style.addVisualMappingFunction(_passthroughMapper.createVisualMappingFunction(GEXFViz.ATT_THICKNESS, Double.class, BasicVisualLexicon.EDGE_WIDTH));
+        
+        style.apply(cyNetworkView);
+		
+		//https://groups.google.com/forum/#!msg/cytoscape-discuss/lnUhb6T7w5g/7qBedvdjdkUJ
+		//https://groups.google.com/forum/#!topic/cytoscape-discuss/K3w4khYWnXI
+        //http://wiki.cytoscape.org/Cytoscape_3/AppDeveloper/Cytoscape_3_App_Cookbook#How_to_use_the_VizMapper_programmatically.3F
+
 		
 		cyNetworkView.updateView();
 
@@ -82,8 +117,7 @@ public class GEXFNetworkReader extends AbstractCyNetworkReader  {
 
 		
 		GEXFParser gexfParser = new GEXFParser();
-		_vizProps = gexfParser.ParseStream(_inputStream, _cyNetwork, _cyGroupFactory, _cyGroupManager);
-
+		gexfParser.ParseStream(_inputStream, _cyNetwork, _cyGroupFactory, _cyGroupManager);
 
 		monitor.setStatusMessage("Add network");
 		monitor.setProgress(1.00);

@@ -13,7 +13,6 @@ import org.cytoscape.group.CyGroupFactory;
 import org.cytoscape.group.CyGroupManager;
 import org.cytoscape.model.CyNetwork;
 
-import edu.umuc.swen670.gexf.internal.io.DelayedVizProp;
 
 public class GEXF12Parser extends GEXFParserBase {
 	
@@ -22,13 +21,15 @@ public class GEXF12Parser extends GEXFParserBase {
 	}
 	
 	@Override
-	public List<DelayedVizProp> ParseStream() throws IOException, XMLStreamException {
+	public void ParseStream() throws IOException, XMLStreamException {
 		
 		String defaultEdgeType = "";
 		String mode = "";
 		
 		_cyNetwork.getDefaultEdgeTable().createColumn(GEXFEdge.EDGETYPE, String.class, true);
 		_cyNetwork.getDefaultEdgeTable().createColumn(GEXFEdge.WEIGHT, Double.class, true);
+		
+		SetupVisualMapping();
 		
 		while(_xmlReader.hasNext()) {
 			int event = _xmlReader.next();
@@ -37,8 +38,8 @@ public class GEXF12Parser extends GEXFParserBase {
 			case XMLStreamConstants.END_ELEMENT :
 				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFGraph.GRAPH)) {
 					CreateGroups();
-					
-					return _vizProps;
+
+					return;
 				}
 			case XMLStreamConstants.START_ELEMENT :
 				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFMeta.META)) {
