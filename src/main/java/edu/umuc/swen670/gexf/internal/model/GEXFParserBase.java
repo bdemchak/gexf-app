@@ -436,7 +436,7 @@ abstract class GEXFParserBase {
 					_cyNetwork.getRow(cyEdge).set(GEXFViz.ATT_COLOR, ConvertColorToHex(color));
 					_cyNetwork.getRow(cyEdge).set(GEXFViz.ATT_TRANSPARENCY, color.getAlpha());
 					
-					if(cyEdgeReverse!=null) _cyNetwork.getRow(cyEdgeReverse).set(GEXFViz.ATT_SHAPE, ConvertColorToHex(color));
+					if(cyEdgeReverse!=null) _cyNetwork.getRow(cyEdgeReverse).set(GEXFViz.ATT_COLOR, ConvertColorToHex(color));
 					if(cyEdgeReverse!=null) _cyNetwork.getRow(cyEdgeReverse).set(GEXFViz.ATT_TRANSPARENCY, color.getAlpha());
 				}
 				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFViz.THICKNESS)) {
