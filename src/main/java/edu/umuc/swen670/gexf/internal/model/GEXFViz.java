@@ -16,7 +16,7 @@ public final class GEXFViz {
 	public static final String GREEN = "g";
 	public static final String BLUE = "b";
 	public static final String ALPHA = "a";
-	public static final String HEX = "HEX";
+	public static final String HEX = "hex";
 
 	public static final String X = "x";
 	public static final String Y = "y";
