@@ -101,8 +101,7 @@ public class GEXF13Parser extends GEXFParserBase {
 					c = (char)reader.read();
 				}while(c!='"' && c!='\'');
 				
-				list.add(GenericParse(literal, type));
-				reader.skip(-1);
+				list.add(GenericParse(literal.substring(1, literal.length()), type));
 			}
 			else {
 				String value = "";

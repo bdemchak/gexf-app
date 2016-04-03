@@ -486,7 +486,7 @@ abstract class GEXFParserBase {
 					}
 					else {
 						for(CyIdentifiable cyIdentifiable : cyIdentifiables) {
-							if(cyIdentifiable!=null) {_cyNetwork.getRow(cyIdentifiable).set(attMapping.Id.get(xFor), ParseArray(xValue, type));}
+							if(cyIdentifiable!=null) {_cyNetwork.getRow(cyIdentifiable).set(attMapping.Id.get(xFor), ParseArray(xValue, type.getComponentType()));}
 						}
 					}
 				}

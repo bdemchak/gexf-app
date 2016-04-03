@@ -79,7 +79,7 @@ public class GEXF12Parser extends GEXFParserBase {
 	
 	@Override
 	protected <T> List<T> ParseArray(String array, Class<T> type) throws IOException {
-		String[] values = array.split("|");
+		String[] values = array.split("\\,|\\;|\\|");
 		
 		List<T> list = new ArrayList<T>();
 		for(String value : values) {
