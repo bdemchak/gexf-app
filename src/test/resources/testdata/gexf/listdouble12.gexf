@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gexf xmlns="http://www.gexf.net/1.2draft" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.gexf.net/1.2draft http://www.gexf.net/1.2draft/gexf.xsd" version="1.2">
+  <meta lastmodifieddate="2016-03-09">
+    <creator>Gephi.org</creator>
+    <description>Data Type Support Test</description>
+  </meta>
+  <graph defaultedgetype="directed">
+    <attributes class="node">
+	  <attribute id="0" title="integer-test" type="integer"/>
+      <attribute id="1" title="listdouble-test" type=" listdouble"/>
+	 </attributes>
+    <nodes>
+      <node id="0" label="NodeOne">
+        <attvalues>
+		  <attvalue for="0" value="5"/>
+          <attvalue for="1" value="24.2|36.9"/>
+		</attvalues>
+      </node>
+      <node id="1" label="NodeTwo">
+        <attvalues>
+		  <attvalue for="0" value="10"/>
+          <attvalue for="1" value="44.0"/>
+		  </attvalues>
+      </node>
+	</nodes>
+    <edges>
+      <edge id="0" source="0" target="1"/>
+	</edges>
+  </graph>
+</gexf>
