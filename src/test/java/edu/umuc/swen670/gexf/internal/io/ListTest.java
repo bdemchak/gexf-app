@@ -108,5 +108,49 @@ public class ListTest extends TestBase {
 		ValidateNodeAttributes(cyNetwork, nodeNameId.get("NodeTwo"), names, types, new Object[] {10, new String[]{"bar"}});
 		ValidateNodeAttributes(cyNetwork, nodeNameId.get("NodeThree"), names, types, new Object[] {15, new String[]{"embedded space","bar"}});
 	}
+	
+	@Test
+	public void ParseListBoolean12() throws Exception {
+		InputStream stream = this.getClass().getClassLoader().getResourceAsStream("testData/gexf/listboolean12.gexf");
+		assertNotNull(stream);
+		
+		CyNetwork[] cyNetworks = RunFile(stream);
+		
+		assertNotNull(cyNetworks);
+		assertEquals(1, cyNetworks.length);
+		
+		CyNetwork cyNetwork = cyNetworks[0];
+		
+		//check the counts
+		assertEquals(2, cyNetwork.getNodeCount());
+		assertEquals(1, cyNetwork.getEdgeCount());
+		
+		
+		
+		//build the node map
+		HashMap<String, Long> nodeNameId = BuildNodeMap(cyNetwork);
+		
+		//check the nodes
+		assertEquals(true, nodeNameId.containsKey("NodeOne"));
+		assertEquals(true, nodeNameId.containsKey("NodeTwo"));
+		
+		
+		//build the edge map
+		HashMap<Long, List<Long>> edgeMapping = new HashMap<Long, List<Long>>();
+		edgeMapping.put(nodeNameId.get("NodeOne"), new ArrayList(Arrays.asList(nodeNameId.get("NodeTwo"))));
+		
+		HashMap<String, List<Boolean>> edgeMappingDirected = new HashMap<String, List<Boolean>>();
+		edgeMappingDirected.put(nodeNameId.get("NodeOne").toString() + "," + nodeNameId.get("NodeTwo").toString(), new ArrayList(Arrays.asList(true)));
+		
+		CheckEdges(cyNetwork, edgeMapping, edgeMappingDirected);
+		
+		
+		//check the node attributes
+		String[] names = new String[]{"integer-test", "listboolean-test"};
+		Class[] types = new Class[] {Integer.class, Boolean[].class};
+		
+		ValidateNodeAttributes(cyNetwork, nodeNameId.get("NodeOne"), names, types, new Object[] {5, new Boolean[]{true,false}});
+		ValidateNodeAttributes(cyNetwork, nodeNameId.get("NodeTwo"), names, types, new Object[] {10, new Boolean[]{false}});
+	}
 
 }
