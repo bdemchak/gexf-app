@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gexf xmlns="http://www.gexf.net/1.2draft" xmlns:viz="http://www.gexf.net/1.2draft/viz" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.gexf.net/1.2draft http://www.gexf.net/1.2draft/gexf.xsd" version="1.2">
+  <meta lastmodifieddate="2016-03-25">
+    <creator>Gephi.org</creator>
+    <description>Viz Test Five</description>
+  </meta>
+  <graph>
+   <nodes>
+      <node id="0" label="One">
+			<viz:color hex="#808000"/>
+			<viz:position x="0" y="0" z="0.0"/>
+			<viz:size value="10"/>
+			<viz:shape value="diamond"/>
+      </node>
+      <node id="1" label="Two">
+			<viz:color r="255" g="215" b="0" a="1.0"/>
+			<viz:position x="10.00" y="10.00" z="0"/>
+			<viz:size value="5"/>
+			<viz:shape value="disc"/>
+      </node>
+	   <node id="2" label="Three">
+	        <viz:color r="255" g="215" b="0" a="1.0"/>
+		    <viz:position x="10.00" y="40.00" z="0"/>
+			<viz:size value="5"/>
+			<viz:shape value="disc"/>
+      </node>
+	  <node id="3" label="Four">
+			<viz:color r="143" g="188" b="143" a="1.0"/>
+			<viz:position x="-10.00" y="-10.00" z="0"/>
+			<viz:size value="5"/>
+			<viz:shape value="diamond"/>
+      </node>
+	  <node id="4" label="Five">
+			<viz:color r="143" g="188" b="143" a="1.0"/>
+			<viz:position x="-10.00" y="-40.00" z="0"/>
+			<viz:size value="5"/>
+			<viz:shape value="triangle"/>
+      </node>
+	</nodes>
+    <edges>
+      <edge id="0" source="0" target="1" type="directed">
+			<viz:color r="165" g="42" b="42"/>
+			<viz:size value="3.0"/>
+			<viz:shape value="solid"/>
+	  </edge>
+	  <edge id="1" source="1" target="2" type="directed">
+			<viz:color r="128" g="0" b="0" a="0.5"/>
+			<viz:size value="3.0"/>
+			<viz:shape value="dotted"/>
+	  </edge>	
+	  <edge id="2" source="0" target="3" type="directed">
+			<viz:color r="47" g="79" b="79" a="1"/>
+			<viz:size value="3.0"/>
+			<viz:shape value="double"/>
+	  </edge>
+	  <edge id="3" source="3" target="4" type="directed">
+			<viz:color r="255" g="105" b="180"/>
+			<viz:size value="3.0"/>
+			<viz:shape value="dashed"/>
+	  </edge>
+	</edges>
+  </graph>
+</gexf>

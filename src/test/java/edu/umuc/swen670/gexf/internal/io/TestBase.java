@@ -106,7 +106,10 @@ public class TestBase {
 	
 	@SuppressWarnings("unchecked")
 	protected <T> void GenericCompare(Object value1, Object value2, Class<T> type) throws InvalidClassException {
-		if(type.equals(Integer.class)) {
+		if(value1==null || value2==null) {
+			assertEquals(value1, value2);
+		}
+		else if(type.equals(Integer.class)) {
 			assertEquals((T)value1, (T)value2);
 		}
 		else if(type.equals(Long.class)) {
