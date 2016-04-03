@@ -42,9 +42,16 @@ public class ListTest extends TestBase {
 		assertEquals(true, nodeNameId.containsKey("NodeThree"));
 		assertEquals(true, nodeNameId.containsKey("NodeFour"));
 		
+		
 		//build the edge map
 		HashMap<Long, List<Long>> edgeMapping = new HashMap<Long, List<Long>>();
 		edgeMapping.put(nodeNameId.get("NodeOne"), new ArrayList(Arrays.asList(nodeNameId.get("NodeTwo"))));
+		
+		HashMap<String, List<Boolean>> edgeMappingDirected = new HashMap<String, List<Boolean>>();
+		edgeMappingDirected.put(nodeNameId.get("NodeOne").toString() + "," + nodeNameId.get("NodeTwo").toString(), new ArrayList(Arrays.asList(true)));
+		
+		CheckEdges(cyNetwork, edgeMapping, edgeMappingDirected);
+		
 		
 		//check the node attributes
 		String[] names = new String[]{"integer-test", "liststring-test"};
@@ -82,9 +89,16 @@ public class ListTest extends TestBase {
 		assertEquals(true, nodeNameId.containsKey("NodeTwo"));
 		assertEquals(true, nodeNameId.containsKey("NodeThree"));
 		
+		
 		//build the edge map
 		HashMap<Long, List<Long>> edgeMapping = new HashMap<Long, List<Long>>();
 		edgeMapping.put(nodeNameId.get("NodeOne"), new ArrayList(Arrays.asList(nodeNameId.get("NodeTwo"))));
+		
+		HashMap<String, List<Boolean>> edgeMappingDirected = new HashMap<String, List<Boolean>>();
+		edgeMappingDirected.put(nodeNameId.get("NodeOne").toString() + "," + nodeNameId.get("NodeTwo").toString(), new ArrayList(Arrays.asList(true)));
+		
+		CheckEdges(cyNetwork, edgeMapping, edgeMappingDirected);
+		
 		
 		//check the node attributes
 		String[] names = new String[]{"integer-test", "liststring-test"};
