@@ -93,9 +93,14 @@ public class TestBase {
 		CyRow cyRow = cyTable.getRow(SUID);
 		
 		for (int i=0; i<attributeNames.length; i++) {
-			Object value = cyRow.get(attributeNames[i], attributeTypes[i]);
-			
-			GenericCompare(value, attributeValues[i], attributeTypes[i]);
+			if(!attributeTypes[i].isArray()) {
+				Object value = cyRow.get(attributeNames[i], attributeTypes[i]);
+				GenericCompare(value, attributeValues[i], attributeTypes[i]);
+			}
+			else {
+				List values = cyRow.getList(attributeNames[i], attributeTypes[i].getComponentType());
+				GenericArrayCompare(values.toArray(), (Object[])attributeValues[i], attributeTypes[i].getComponentType());
+			}
 		}
 	}
 	
@@ -118,6 +123,15 @@ public class TestBase {
 		}
 		else {
 			throw new InvalidClassException(type.getName());
+		}
+	}
+	
+	protected <T> void GenericArrayCompare(Object[] value1, Object[] value2, Class<T> type) throws InvalidClassException {
+		assertEquals(value1.length, value2.length);
+		
+		//do not use arrayAssertEquals because the array could be double[]
+		for(int i=0; i<value1.length; i++) {
+			GenericCompare(value1[i], value2[i], type);
 		}
 	}
 	
