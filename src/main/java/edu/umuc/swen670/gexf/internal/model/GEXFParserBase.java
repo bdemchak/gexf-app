@@ -29,6 +29,7 @@ abstract class GEXFParserBase {
 	protected XMLStreamReader _xmlReader = null;
 	protected CyNetwork _cyNetwork = null;
 	protected String _version = "";
+	protected String _defaultEdgeType = "";
 	protected CyGroupFactory _cyGroupFactory = null;
 	protected CyGroupManager _cyGroupManager = null;
 	
@@ -262,6 +263,9 @@ abstract class GEXFParserBase {
 					ArrayList<String> nodesToAddToGroup = ParseNodes(cyNode);
 					_parentIdToChildrenIdLookup.put(cyNodeId, nodesToAddToGroup);
 				}
+				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFEdge.EDGES)) {
+					ParseEdges();
+				}
 				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFAttribute.ATTVALUES)) {
 					ParseAttributes(new CyIdentifiable[] {cyNode}, _attNodeMapping);
 				}
@@ -312,7 +316,7 @@ abstract class GEXFParserBase {
 		throw new InvalidClassException("Missing Node tags");
 	}
 	
-	protected void ParseEdges(String defaultEdgeType) throws IOException, XMLStreamException {
+	protected void ParseEdges() throws IOException, XMLStreamException {
 		
 		CyEdge cyEdge = null;
 		CyEdge cyEdgeReverse = null;
@@ -365,7 +369,7 @@ abstract class GEXFParserBase {
 					//String xId = _xmlReader.getAttributeValue(null, GEXFEdge.ID).trim();
 					String xSource = _xmlReader.getAttributeValue(null, GEXFEdge.SOURCE).trim();
 					String xTarget = _xmlReader.getAttributeValue(null, GEXFEdge.TARGET).trim();
-					String xEdgeType = edgeElementAttributes.contains(GEXFEdge.EDGETYPE) ? _xmlReader.getAttributeValue(null, GEXFEdge.EDGETYPE).trim() : defaultEdgeType;
+					String xEdgeType = edgeElementAttributes.contains(GEXFEdge.EDGETYPE) ? _xmlReader.getAttributeValue(null, GEXFEdge.EDGETYPE).trim() : _defaultEdgeType;
 					String xEdgeWeight = edgeElementAttributes.contains(GEXFEdge.WEIGHT) ? _xmlReader.getAttributeValue(null, GEXFEdge.WEIGHT).trim() : "";
 					
 					if(!_idMapping.containsKey(xSource)) {

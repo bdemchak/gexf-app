@@ -23,8 +23,7 @@ public class GEXF13Parser extends GEXFParserBase {
 
 	@Override
 	public void ParseStream() throws IOException, XMLStreamException {
-		
-		String defaultEdgeType = "";
+
 		String mode = "";
 		
 		_cyNetwork.getDefaultEdgeTable().createColumn(GEXFEdge.EDGETYPE, String.class, true);
@@ -50,7 +49,7 @@ public class GEXF13Parser extends GEXFParserBase {
 				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFGraph.GRAPH)) {
 					List<String> graphAttributes = GetElementAttributes();
 					
-					defaultEdgeType = graphAttributes.contains(GEXFGraph.DEFAULTEDGETYPE) ? _xmlReader.getAttributeValue(null, GEXFGraph.DEFAULTEDGETYPE).trim() : EdgeTypes.UNDIRECTED;
+					_defaultEdgeType = graphAttributes.contains(GEXFGraph.DEFAULTEDGETYPE) ? _xmlReader.getAttributeValue(null, GEXFGraph.DEFAULTEDGETYPE).trim() : EdgeTypes.UNDIRECTED;
 					mode = graphAttributes.contains(GEXFGraph.MODE) ? _xmlReader.getAttributeValue(null, GEXFGraph.MODE).trim() : GEXFGraph.STATIC;
 					if(mode.equalsIgnoreCase(GEXFGraph.DYNAMIC)) {throw new InvalidClassException("Dynamic graphs are not supported.");}
 				}
@@ -70,7 +69,7 @@ public class GEXF13Parser extends GEXFParserBase {
 					ParseNodes(null);
 				}
 				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFEdge.EDGES)) {
-					ParseEdges(defaultEdgeType);
+					ParseEdges();
 				}
 			}
 		}
