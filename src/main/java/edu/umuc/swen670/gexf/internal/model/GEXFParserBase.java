@@ -613,7 +613,7 @@ abstract class GEXFParserBase {
 			return LineTypeVisualProperty.EQUAL_DASH.getSerializableString();
 		}
 		else if(shape.equalsIgnoreCase(GEXFViz.DOUBLE)) {
-			return "PARALLEL_LINES";
+			return GEXFViz.PARALLEL;
 		}
 		else {
 			return LineTypeVisualProperty.SOLID.getSerializableString();
