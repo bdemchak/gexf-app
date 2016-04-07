@@ -48,12 +48,6 @@ public class CyActivator extends AbstractCyActivator {
 		final Properties gexfNetworkReaderFactoryProperties = new Properties();
 		gexfNetworkReaderFactoryProperties.put(ServiceProperties.ID, "GEXFNetworkReaderFactory");
 		registerService(context, gexfNetworkReaderFactory, InputStreamTaskFactory.class, gexfNetworkReaderFactoryProperties);
-
-
-		//register menu
-		MenuAction action = new MenuAction(cyApplicationManager, "Hello World App");
-		Properties properties = new Properties();
-		registerAllServices(context, action, properties);
 	}
 
 }
