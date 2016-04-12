@@ -651,6 +651,7 @@ abstract class GEXFParserBase {
 	}
 	
 	protected void CreateGroups() {
+		/*
 		Enumeration<String> pidEnumeration = _parentIdToChildrenIdLookup.keys();
 		while(pidEnumeration.hasMoreElements()) {
 			String pid = pidEnumeration.nextElement();
@@ -676,6 +677,7 @@ abstract class GEXFParserBase {
 			//CyGroup newGroup = _cyGroupFactory.createGroup(_cyNetwork, parentNode, allDescendantsOfNode, edgesInGroupList, true);
 			_cyGroupManager.addGroup(newGroup);
 		}
+		*/
 	}
 	
 	protected abstract Boolean IsDirected(String direction);
