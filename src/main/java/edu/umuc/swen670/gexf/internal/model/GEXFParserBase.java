@@ -393,6 +393,19 @@ abstract class GEXFParserBase {
 						if(cyEdgeReverse!=null) _cyNetwork.getRow(cyEdgeReverse).set(GEXFEdge.WEIGHT, Double.parseDouble(xEdgeWeight));
 					}
 					
+					//add the default edge color based on the source/target node, these values may get overwritten if discrete values are provided later
+					if(cyEdge!=null){
+						CyRow sourceRow = _cyNetwork.getRow(_cyNetwork.getNode(_idMapping.get(xSource)));
+						String sourceColor = sourceRow.get(GEXFViz.ATT_COLOR, String.class);
+						if(sourceColor!=null) { _cyNetwork.getRow(cyEdge).set(GEXFViz.ATT_COLOR, sourceColor); }
+					}
+					
+					if(cyEdgeReverse!=null){
+						CyRow targetRow = _cyNetwork.getRow(_cyNetwork.getNode(_idMapping.get(xTarget)));
+						String targetColor = targetRow.get(GEXFViz.ATT_COLOR, String.class);
+						if(targetColor!=null) { _cyNetwork.getRow(cyEdgeReverse).set(GEXFViz.ATT_COLOR, targetColor); }
+					}
+					
 					if (!_sourceNodeIdToEdgeLookup.containsKey(xSource)) {
 						_sourceNodeIdToEdgeLookup.put(xSource, new ArrayList<CyEdge>());
 					}
