@@ -299,7 +299,7 @@ abstract class GEXFParserBase {
 					_cyNetwork.getRow(cyNode).set(GEXFViz.ATT_Z, z);
 				}
 				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFViz.SIZE)) {
-					double value = Double.parseDouble(_xmlReader.getAttributeValue(null, GEXFViz.VALUE).trim());
+					double value = 2.0d*Double.parseDouble(_xmlReader.getAttributeValue(null, GEXFViz.VALUE).trim());
 					
 					_cyNetwork.getRow(cyNode).set(GEXFViz.ATT_SIZE, value);
 				}

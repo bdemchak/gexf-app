@@ -40,7 +40,7 @@ public class VizTest extends TestBase {
 		String[] names =  new String[]{"viz_color", "viz_transparency", "viz_x", "viz_y", "viz_z", "viz_size", "viz_shape"};
 		Class[] types = new Class[] {String.class, Integer.class, Double.class, Double.class, Double.class, Double.class, String.class};
 		
-		ValidateNodeAttributes(cyNetwork, nodeNameId.get("glossy"), names, types, new Object[] {"#efad42", 153, 15.783598d, -40.109245d, 0.0d, 2.0375757d, null});
+		ValidateNodeAttributes(cyNetwork, nodeNameId.get("glossy"), names, types, new Object[] {"#efad42", 153, 15.783598d, -40.109245d, 0.0d, 4.0751514d, null});
 	}
 	
 	@Test
@@ -90,11 +90,11 @@ public class VizTest extends TestBase {
 		String[] names =  new String[]{"viz_color", "viz_transparency", "viz_x", "viz_y", "viz_z", "viz_size", "viz_shape"};
 		Class[] types = new Class[] {String.class, Integer.class, Double.class, Double.class, Double.class, Double.class, String.class};
 		
-		ValidateNodeAttributes(cyNetwork, nodeNameId.get("One"), names, types, new Object[] {"#808000", 255, 0.0d, 0.0d, 0.0d, 10.0d, "DIAMOND"});
-		ValidateNodeAttributes(cyNetwork, nodeNameId.get("Two"), names, types, new Object[] {"#ffd700", 255, 10.0d, -10.0d, 0.0d, 5.0d, "ELLIPSE"});
-		ValidateNodeAttributes(cyNetwork, nodeNameId.get("Three"), names, types, new Object[] {"#ffd700", 255, 10.0d, -40.0d, 0.0d, 5.0d, "ELLIPSE"});
-		ValidateNodeAttributes(cyNetwork, nodeNameId.get("Four"), names, types, new Object[] {"#8fbc8f", 255, -10.0d, 10.0d, 0.0d, 5.0d, "DIAMOND"});
-		ValidateNodeAttributes(cyNetwork, nodeNameId.get("Five"), names, types, new Object[] {"#8fbc8f", 255, -10.0d, 40.0d, 0.0d, 5.0d, "TRIANGLE"});
+		ValidateNodeAttributes(cyNetwork, nodeNameId.get("One"), names, types, new Object[] {"#808000", 255, 0.0d, 0.0d, 0.0d, 20.0d, "DIAMOND"});
+		ValidateNodeAttributes(cyNetwork, nodeNameId.get("Two"), names, types, new Object[] {"#ffd700", 255, 10.0d, -10.0d, 0.0d, 10.0d, "ELLIPSE"});
+		ValidateNodeAttributes(cyNetwork, nodeNameId.get("Three"), names, types, new Object[] {"#ffd700", 255, 10.0d, -40.0d, 0.0d, 10.0d, "ELLIPSE"});
+		ValidateNodeAttributes(cyNetwork, nodeNameId.get("Four"), names, types, new Object[] {"#8fbc8f", 255, -10.0d, 10.0d, 0.0d, 10.0d, "DIAMOND"});
+		ValidateNodeAttributes(cyNetwork, nodeNameId.get("Five"), names, types, new Object[] {"#8fbc8f", 255, -10.0d, 40.0d, 0.0d, 10.0d, "TRIANGLE"});
 		
 		
 		//check the edge attributes
