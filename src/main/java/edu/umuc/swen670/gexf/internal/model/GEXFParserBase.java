@@ -674,14 +674,27 @@ abstract class GEXFParserBase {
 		
 		//Try2
 		while(pidEnumeration.hasMoreElements()) {
+			//Create group node from parent node's non-group node
 			String pid = pidEnumeration.nextElement();
 			CyNode parentNode = _cyNetwork.getNode(_idMapping.get(pid));
 			CyGroup newGroup = _cyGroupFactory.createGroup(_cyNetwork, parentNode, getImmediateDescendantsOfCyNodeByIdGroup(pid), null, true);
-			_cyGroupManager.addGroup(newGroup);
-			final CyRow groupRow = ((CySubNetwork)_cyNetwork).getRootNetwork().getRow(newGroup.getGroupNode(), CyRootNetwork.SHARED_ATTRS);
-			groupRow.set(CyRootNetwork.SHARED_NAME, "test group");
 			
+			//Set group to show as a compound node
+			
+			//Add group to Group Manager (not sure why this is needed)
+			_cyGroupManager.addGroup(newGroup);
+			
+			//Apply copyable attributes from parent node's non-group node to its group node
+			final CyRow nonGroupRow = _cyNetwork.getRow(parentNode);
+			final CyRow groupRow = ((CySubNetwork)_cyNetwork).getRootNetwork().getRow(newGroup.getGroupNode(), CyRootNetwork.SHARED_ATTRS);
+			groupRow.set(CyRootNetwork.SHARED_NAME, "test");//nonGroupRow.get(CyNetwork.NAME, String.class));
+			
+			//Update Pid --> CyGroup Lookup Hashtable
 			_pidToCyGroupLookup.put(pid, newGroup);
+			
+			//Update CyEdges that point from/to parent node's non-group node to use group node
+			
+			//Remove parent node's non-group node from the network
 			_cyNetwork.removeNodes(new ArrayList<CyNode>(Arrays.asList(parentNode)));
 		}
 		
