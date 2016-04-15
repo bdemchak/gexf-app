@@ -22,6 +22,8 @@ import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
+import org.cytoscape.model.subnetwork.CyRootNetwork;
+import org.cytoscape.model.subnetwork.CySubNetwork;
 import org.cytoscape.view.presentation.property.LineTypeVisualProperty;
 import org.cytoscape.view.presentation.property.NodeShapeVisualProperty;
 
@@ -674,14 +676,13 @@ abstract class GEXFParserBase {
 		while(pidEnumeration.hasMoreElements()) {
 			String pid = pidEnumeration.nextElement();
 			CyNode parentNode = _cyNetwork.getNode(_idMapping.get(pid));
-			CyGroup newGroup = _cyGroupFactory.createGroup(_cyNetwork, getImmediateDescendantsOfCyNodeByIdGroup(pid), null, true);
-			//_cyGroupManager.addGroup(newGroup);
-			newGroup.getRootNetwork().getRow(newGroup.getGroupNode()).set("name", "test group");
-			newGroup.getRootNetwork().getRow(newGroup.getGroupNode()).set("shared name", "shared test group");
-			//newGroup.collapse(_cyNetwork);
+			CyGroup newGroup = _cyGroupFactory.createGroup(_cyNetwork, parentNode, getImmediateDescendantsOfCyNodeByIdGroup(pid), null, true);
+			_cyGroupManager.addGroup(newGroup);
+			final CyRow groupRow = ((CySubNetwork)_cyNetwork).getRootNetwork().getRow(newGroup.getGroupNode(), CyRootNetwork.SHARED_ATTRS);
+			groupRow.set(CyRootNetwork.SHARED_NAME, "test group");
 			
-//			_pidToCyGroupLookup.put(pid, newGroup);
-			//_cyNetwork.removeNodes(new ArrayList<CyNode>(Arrays.asList(parentNode)));
+			_pidToCyGroupLookup.put(pid, newGroup);
+			_cyNetwork.removeNodes(new ArrayList<CyNode>(Arrays.asList(parentNode)));
 		}
 		
 		//Try 1
