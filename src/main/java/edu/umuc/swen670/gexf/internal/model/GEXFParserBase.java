@@ -641,18 +641,6 @@ abstract class GEXFParserBase {
 		return result;
 	}
 	
-	protected ArrayList<CyNode> getImmediateDescendantsOfCyNodeById(String pid) {
-		ArrayList<CyNode> result = new ArrayList<CyNode>();
-		if (!_parentIdToChildrenIdLookup.containsKey(pid)) {
-			return null;
-		}
-		ArrayList<String> childIds = _parentIdToChildrenIdLookup.get(pid);
-		for (int i=0; i<childIds.size(); i++) {
-			result.add(_cyNetwork.getNode(_idMapping.get(childIds.get(i))));
-		}
-		return result;
-	}
-	
 	protected void CreateGroups() {
 		Enumeration<String> pidEnumeration = _parentIdToChildrenIdLookup.keys();
 //		while(pidEnumeration.hasMoreElements()) {
@@ -682,29 +670,45 @@ abstract class GEXFParserBase {
 		
 		_pidToCyGroupLookup = new Hashtable<String, CyGroup>();
 		
-		//Create group nodes for nodes that have children and remove the non-group version of the node
+		//Try2
 		while(pidEnumeration.hasMoreElements()) {
 			String pid = pidEnumeration.nextElement();
 			CyNode parentNode = _cyNetwork.getNode(_idMapping.get(pid));
-			CyGroup newGroup = _cyGroupFactory.createGroup(_cyNetwork, parentNode, null, null, true);
+			CyGroup newGroup = _cyGroupFactory.createGroup(_cyNetwork, getImmediateDescendantsOfCyNodeByIdGroup(pid), null, true);
+			//_cyGroupManager.addGroup(newGroup);
+			newGroup.getRootNetwork().getRow(newGroup.getGroupNode()).set("name", "test group");
+			newGroup.getRootNetwork().getRow(newGroup.getGroupNode()).set("shared name", "shared test group");
 			//newGroup.collapse(_cyNetwork);
-			_pidToCyGroupLookup.put(pid, newGroup);
-			_cyNetwork.removeNodes(new ArrayList<CyNode>(Arrays.asList(parentNode)));
+			
+//			_pidToCyGroupLookup.put(pid, newGroup);
+			//_cyNetwork.removeNodes(new ArrayList<CyNode>(Arrays.asList(parentNode)));
 		}
 		
-		//Add children nodes to group nodes
-		Enumeration<String> groupPidEnumeration = _pidToCyGroupLookup.keys();
-		while(groupPidEnumeration.hasMoreElements()) {
-			String pid = groupPidEnumeration.nextElement();
-			CyGroup currentGroup = _pidToCyGroupLookup.get(pid);
-			//currentGroup.expand(_cyNetwork);
-			currentGroup.addNodes(getDescendantsOfCyNodeByIdGroup(pid));
-			//currentGroup.collapse(_cyNetwork);
-		}
-		
-//		if (_pidToCyGroupLookup.containsKey("a")) {
-//			_pidToCyGroupLookup.get("a").expand(_cyNetwork);
+		//Try 1
+//		//Create group nodes for nodes that have children and remove the non-group version of the node
+//		while(pidEnumeration.hasMoreElements()) {
+//			String pid = pidEnumeration.nextElement();
+//			CyNode parentNode = _cyNetwork.getNode(_idMapping.get(pid));
+//			CyGroup newGroup = _cyGroupFactory.createGroup(_cyNetwork, parentNode, null, null, true);
+//			_cyGroupManager.addGroup(newGroup);
+//			//newGroup.collapse(_cyNetwork);
+//			_pidToCyGroupLookup.put(pid, newGroup);
+//			_cyNetwork.removeNodes(new ArrayList<CyNode>(Arrays.asList(parentNode)));
 //		}
+//		
+//		//Add children nodes to group nodes
+//		Enumeration<String> groupPidEnumeration = _pidToCyGroupLookup.keys();
+//		while(groupPidEnumeration.hasMoreElements()) {
+//			String pid = groupPidEnumeration.nextElement();
+//			CyGroup currentGroup = _pidToCyGroupLookup.get(pid);
+//			//currentGroup.expand(_cyNetwork);
+//			currentGroup.addNodes(getDescendantsOfCyNodeByIdGroup(pid));
+//			//currentGroup.collapse(_cyNetwork);
+//		}
+//		
+////		if (_pidToCyGroupLookup.containsKey("a")) {
+////			_pidToCyGroupLookup.get("a").expand(_cyNetwork);
+////		}
 	}
 	
 	protected ArrayList<CyNode> getDescendantsOfCyNodeByIdGroup(String pid) {
@@ -739,6 +743,18 @@ abstract class GEXFParserBase {
 			} else {
 				result.add(_cyNetwork.getNode(_idMapping.get(childIds.get(i))));
 			}
+		}
+		return result;
+	}
+	
+	protected ArrayList<CyNode> getImmediateDescendantsOfCyNodeById(String pid) {
+		ArrayList<CyNode> result = new ArrayList<CyNode>();
+		if (!_parentIdToChildrenIdLookup.containsKey(pid)) {
+			return null;
+		}
+		ArrayList<String> childIds = _parentIdToChildrenIdLookup.get(pid);
+		for (int i=0; i<childIds.size(); i++) {
+			result.add(_cyNetwork.getNode(_idMapping.get(childIds.get(i))));
 		}
 		return result;
 	}
