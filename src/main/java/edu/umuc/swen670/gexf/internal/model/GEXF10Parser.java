@@ -11,13 +11,16 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.cytoscape.group.CyGroupFactory;
 import org.cytoscape.group.CyGroupManager;
+import org.cytoscape.group.CyGroupSettingsManager;
+import org.cytoscape.group.CyGroupSettingsManager.GroupViewType;
 import org.cytoscape.model.CyNetwork;
 
 
 public class GEXF10Parser extends GEXFParserBase {
 
-	public GEXF10Parser(XMLStreamReader xmlReader, CyNetwork cyNetwork, String version, CyGroupFactory cyGroupFactory, CyGroupManager cyGroupManager) {
-		super(xmlReader, cyNetwork, version, cyGroupFactory, cyGroupManager);
+	public GEXF10Parser(XMLStreamReader xmlReader, CyNetwork cyNetwork, String version,
+			CyGroupFactory cyGroupFactory, CyGroupManager cyGroupManager, CyGroupSettingsManager cyGroupSettingsManager) {
+		super(xmlReader, cyNetwork, version, cyGroupFactory, cyGroupManager, cyGroupSettingsManager);
 	}
 
 	@Override
@@ -29,6 +32,7 @@ public class GEXF10Parser extends GEXFParserBase {
 		_cyNetwork.getDefaultEdgeTable().createColumn(GEXFEdge.WEIGHT, Double.class, true);
 		
 		SetupVisualMapping();
+		_cyGroupSettingsManager.setGroupViewType(GroupViewType.SHOWGROUPNODE);
 		
 		while(_xmlReader.hasNext()) {
 			int event = _xmlReader.next();

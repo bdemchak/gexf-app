@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -16,6 +17,8 @@ import javax.xml.stream.XMLStreamReader;
 import org.cytoscape.group.CyGroup;
 import org.cytoscape.group.CyGroupFactory;
 import org.cytoscape.group.CyGroupManager;
+import org.cytoscape.group.CyGroupSettingsManager;
+import org.cytoscape.group.CyGroupSettingsManager.GroupViewType;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyNetwork;
@@ -35,6 +38,7 @@ abstract class GEXFParserBase {
 	protected String _defaultEdgeType = "";
 	protected CyGroupFactory _cyGroupFactory = null;
 	protected CyGroupManager _cyGroupManager = null;
+	protected CyGroupSettingsManager _cyGroupSettingsManager = null;
 	
 	protected Hashtable<String, Long> _idMapping = new Hashtable<String, Long>();
 	protected Hashtable<String, ArrayList<String>> _parentIdToChildrenIdLookup = new Hashtable<String, ArrayList<String>>();
@@ -44,12 +48,14 @@ abstract class GEXFParserBase {
 	protected AttributeMapping _attNodeMapping = null;
 	protected AttributeMapping _attEdgeMapping = null;
 
-	public GEXFParserBase(XMLStreamReader xmlReader, CyNetwork cyNetwork, String version, CyGroupFactory cyGroupFactory, CyGroupManager cyGroupManager) {
+	public GEXFParserBase(XMLStreamReader xmlReader, CyNetwork cyNetwork, String version,
+			CyGroupFactory cyGroupFactory, CyGroupManager cyGroupManager, CyGroupSettingsManager cyGroupSettingsManager) {
 		_xmlReader = xmlReader;
 		_cyNetwork = cyNetwork;
 		_version = version;
 		_cyGroupFactory = cyGroupFactory;
 		_cyGroupManager = cyGroupManager;
+		_cyGroupSettingsManager = cyGroupSettingsManager;
 	}
 	
 	public abstract void ParseStream() throws IOException, XMLStreamException;
@@ -677,17 +683,17 @@ abstract class GEXFParserBase {
 			//Create group node from parent node's non-group node
 			String pid = pidEnumeration.nextElement();
 			CyNode parentNode = _cyNetwork.getNode(_idMapping.get(pid));
+			if (_pidToCyGroupLookup.containsKey(pid)) {
+				parentNode = _pidToCyGroupLookup.get(pid).getGroupNode();
+			}
 			CyGroup newGroup = _cyGroupFactory.createGroup(_cyNetwork, parentNode, getImmediateDescendantsOfCyNodeByIdGroup(pid), null, true);
-			
-			//Set group to show as a compound node
 			
 			//Add group to Group Manager (not sure why this is needed)
 			_cyGroupManager.addGroup(newGroup);
 			
 			//Apply copyable attributes from parent node's non-group node to its group node
-			final CyRow nonGroupRow = _cyNetwork.getRow(parentNode);
+			final CyRow nonGroupRow = ((CySubNetwork)_cyNetwork).getRootNetwork().getRow(parentNode);//_cyNetwork.getRow(parentNode);
 			final CyRow groupRow = ((CySubNetwork)_cyNetwork).getRootNetwork().getRow(newGroup.getGroupNode(), CyRootNetwork.SHARED_ATTRS);
-			groupRow.set(CyRootNetwork.SHARED_NAME, "test");//nonGroupRow.get(CyNetwork.NAME, String.class));
 			
 			//Update Pid --> CyGroup Lookup Hashtable
 			_pidToCyGroupLookup.put(pid, newGroup);
@@ -696,6 +702,7 @@ abstract class GEXFParserBase {
 			
 			//Remove parent node's non-group node from the network
 			_cyNetwork.removeNodes(new ArrayList<CyNode>(Arrays.asList(parentNode)));
+			
 		}
 		
 		//Try 1

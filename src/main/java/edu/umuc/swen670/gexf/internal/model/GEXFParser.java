@@ -11,12 +11,14 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.cytoscape.group.CyGroupFactory;
 import org.cytoscape.group.CyGroupManager;
+import org.cytoscape.group.CyGroupSettingsManager;
 import org.cytoscape.model.CyNetwork;
 
 
 public class GEXFParser {
 
-	public void ParseStream(InputStream inputStream, CyNetwork cyNetwork, CyGroupFactory cyGroupFactory, CyGroupManager cyGroupManager) throws IOException, XMLStreamException {
+	public void ParseStream(InputStream inputStream, CyNetwork cyNetwork, CyGroupFactory cyGroupFactory,
+			CyGroupManager cyGroupManager, CyGroupSettingsManager cyGroupSettingsManager) throws IOException, XMLStreamException {
 		XMLInputFactory xmlFactory = XMLInputFactory.newInstance();
 		XMLStreamReader xmlReader = xmlFactory.createXMLStreamReader(inputStream);
 
@@ -33,24 +35,24 @@ public class GEXFParser {
 
 					if(version == null) {
 						//no version declared, try to parse with the latest supported version
-						parser = new GEXF13Parser(xmlReader, cyNetwork, version, cyGroupFactory, cyGroupManager);
+						parser = new GEXF13Parser(xmlReader, cyNetwork, version, cyGroupFactory, cyGroupManager, cyGroupSettingsManager);
 					}
 					else if(version.startsWith(GEXFGraph.VERSION0) || version.equalsIgnoreCase(GEXFGraph.VERSION10)) {
-						parser = new GEXF10Parser(xmlReader, cyNetwork, version, cyGroupFactory, cyGroupManager);
+						parser = new GEXF10Parser(xmlReader, cyNetwork, version, cyGroupFactory, cyGroupManager, cyGroupSettingsManager);
 
 					}
 					else if(version.equalsIgnoreCase(GEXFGraph.VERSION11)) {
-						parser = new GEXF12Parser(xmlReader, cyNetwork, version, cyGroupFactory, cyGroupManager);
+						parser = new GEXF12Parser(xmlReader, cyNetwork, version, cyGroupFactory, cyGroupManager, cyGroupSettingsManager);
 					}
 					else if(version.equalsIgnoreCase(GEXFGraph.VERSION12)) {
-						parser = new GEXF12Parser(xmlReader, cyNetwork, version, cyGroupFactory, cyGroupManager);
+						parser = new GEXF12Parser(xmlReader, cyNetwork, version, cyGroupFactory, cyGroupManager, cyGroupSettingsManager);
 					}
 					else if(version.equalsIgnoreCase(GEXFGraph.VERSION13)) {
-						parser = new GEXF13Parser(xmlReader, cyNetwork, version, cyGroupFactory, cyGroupManager);
+						parser = new GEXF13Parser(xmlReader, cyNetwork, version, cyGroupFactory, cyGroupManager, cyGroupSettingsManager);
 					}
 					else {
 						//try to parse with the latest supported version
-						parser = new GEXF13Parser(xmlReader, cyNetwork, version, cyGroupFactory, cyGroupManager);
+						parser = new GEXF13Parser(xmlReader, cyNetwork, version, cyGroupFactory, cyGroupManager, cyGroupSettingsManager);
 					}
 
 					parser.ParseStream();

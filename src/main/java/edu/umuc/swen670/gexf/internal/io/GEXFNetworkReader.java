@@ -7,6 +7,7 @@ import java.util.List;
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.group.CyGroupFactory;
 import org.cytoscape.group.CyGroupManager;
+import org.cytoscape.group.CyGroupSettingsManager;
 import org.cytoscape.io.read.AbstractCyNetworkReader;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkFactory;
@@ -37,6 +38,7 @@ public class GEXFNetworkReader extends AbstractCyNetworkReader  {
 	private final CyEventHelper _cyEventHelper;
 	private final CyGroupFactory _cyGroupFactory;
 	private final CyGroupManager _cyGroupManager;
+	private final CyGroupSettingsManager _cyGroupSettingsManager;
 	private final VisualMappingFunctionFactory _passthroughMapper;
 	private final VisualMappingManager _visualMappingManager;
 
@@ -44,8 +46,8 @@ public class GEXFNetworkReader extends AbstractCyNetworkReader  {
 	public GEXFNetworkReader(InputStream inputStream, CyNetworkViewFactory cyNetworkViewFactory,
 			CyNetworkFactory cyNetworkFactory, CyNetworkManager cyNetworkManager,
 			CyRootNetworkManager cyRootNetworkManager, final CyEventHelper cyEventHelper,
-			CyGroupFactory cyGroupFactory, CyGroupManager cyGroupManager, final VisualMappingFunctionFactory passthroughMapper, 
-			final VisualMappingManager visualMappingManager) {
+			CyGroupFactory cyGroupFactory, CyGroupManager cyGroupManager, CyGroupSettingsManager cyGroupSettingsManager, 
+			final VisualMappingFunctionFactory passthroughMapper, final VisualMappingManager visualMappingManager) {
 		super(inputStream, cyNetworkViewFactory, cyNetworkFactory, cyNetworkManager, cyRootNetworkManager);
 
 		if (inputStream == null) throw new NullPointerException("inputStream cannot be null");
@@ -56,6 +58,7 @@ public class GEXFNetworkReader extends AbstractCyNetworkReader  {
 		if (cyEventHelper == null) throw new NullPointerException("cyRootNetworkManager cannot be null");
 		if (cyGroupFactory == null) throw new NullPointerException("cyGroupFactory cannot be null");
 		if (cyGroupManager == null) throw new NullPointerException("cyGroupManager cannot be null");
+		if (cyGroupSettingsManager == null) throw new NullPointerException("cyGroupSettingsManager cannot be null");
 
 		_inputStream = inputStream;
 		_cyNetworkViewFactory = cyNetworkViewFactory;
@@ -65,6 +68,7 @@ public class GEXFNetworkReader extends AbstractCyNetworkReader  {
 		_cyEventHelper = cyEventHelper;
 		_cyGroupFactory = cyGroupFactory;
 		_cyGroupManager = cyGroupManager;
+		_cyGroupSettingsManager = cyGroupSettingsManager;
 		_passthroughMapper = passthroughMapper;
 		_visualMappingManager = visualMappingManager;
 	}
@@ -117,7 +121,7 @@ public class GEXFNetworkReader extends AbstractCyNetworkReader  {
 
 		
 		GEXFParser gexfParser = new GEXFParser();
-		gexfParser.ParseStream(_inputStream, _cyNetwork, _cyGroupFactory, _cyGroupManager);
+		gexfParser.ParseStream(_inputStream, _cyNetwork, _cyGroupFactory, _cyGroupManager, _cyGroupSettingsManager);
 
 		monitor.setStatusMessage("Add network");
 		monitor.setProgress(1.00);
