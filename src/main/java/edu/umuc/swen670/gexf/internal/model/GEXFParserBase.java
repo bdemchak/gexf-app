@@ -656,34 +656,9 @@ abstract class GEXFParserBase {
 		}
 		
 		Enumeration<String> pidEnumeration = _parentIdToChildrenIdLookup.keys();
-//		while(pidEnumeration.hasMoreElements()) {
-//			String pid = pidEnumeration.nextElement();
-//			CyNode parentNode = _cyNetwork.getNode(_idMapping.get(pid));
-//			
-//			ArrayList<CyNode> allDescendantsOfNode = getImmediateDescendantsOfCyNodeById(pid);
-//			//ArrayList<CyNode> allDescendantsOfNode = getDescendantsOfCyNodeById(pid);
-//			
-//			ArrayList<CyEdge> sourceEdgeList = _sourceNodeIdToEdgeLookup.get(pid);
-//			ArrayList<CyEdge> edgesInGroupList = new ArrayList<CyEdge>();
-//
-//			if (sourceEdgeList != null) {
-//				for(int i=0; i<sourceEdgeList.size(); i++) {
-//					CyEdge edge = sourceEdgeList.get(i);
-//					CyNode targetNode = edge.getTarget();
-//					if (allDescendantsOfNode.contains(targetNode)) {
-//						edgesInGroupList.add(edge);
-//					}
-//				}
-//			}
-//			
-//			CyGroup newGroup = _cyGroupFactory.createGroup(_cyNetwork, parentNode, allDescendantsOfNode, null, true);
-//			//CyGroup newGroup = _cyGroupFactory.createGroup(_cyNetwork, parentNode, allDescendantsOfNode, edgesInGroupList, true);
-//			_cyGroupManager.addGroup(newGroup);
-//		}
-		
+//				
 		_pidToCyGroupLookup = new Hashtable<String, CyGroup>();
 		
-		//Try2
 		while(pidEnumeration.hasMoreElements()) {
 			//Create group node from parent node's non-group node
 			String pid = pidEnumeration.nextElement();
@@ -703,38 +678,10 @@ abstract class GEXFParserBase {
 			//Update Pid --> CyGroup Lookup Hashtable
 			_pidToCyGroupLookup.put(pid, newGroup);
 			
-			//Update CyEdges that point from/to parent node's non-group node to use group node
-			
 			//Remove parent node's non-group node from the network
 			_cyNetwork.removeNodes(new ArrayList<CyNode>(Arrays.asList(parentNode)));
 			
 		}
-		
-		//Try 1
-//		//Create group nodes for nodes that have children and remove the non-group version of the node
-//		while(pidEnumeration.hasMoreElements()) {
-//			String pid = pidEnumeration.nextElement();
-//			CyNode parentNode = _cyNetwork.getNode(_idMapping.get(pid));
-//			CyGroup newGroup = _cyGroupFactory.createGroup(_cyNetwork, parentNode, null, null, true);
-//			_cyGroupManager.addGroup(newGroup);
-//			//newGroup.collapse(_cyNetwork);
-//			_pidToCyGroupLookup.put(pid, newGroup);
-//			_cyNetwork.removeNodes(new ArrayList<CyNode>(Arrays.asList(parentNode)));
-//		}
-//		
-//		//Add children nodes to group nodes
-//		Enumeration<String> groupPidEnumeration = _pidToCyGroupLookup.keys();
-//		while(groupPidEnumeration.hasMoreElements()) {
-//			String pid = groupPidEnumeration.nextElement();
-//			CyGroup currentGroup = _pidToCyGroupLookup.get(pid);
-//			//currentGroup.expand(_cyNetwork);
-//			currentGroup.addNodes(getDescendantsOfCyNodeByIdGroup(pid));
-//			//currentGroup.collapse(_cyNetwork);
-//		}
-//		
-////		if (_pidToCyGroupLookup.containsKey("a")) {
-////			_pidToCyGroupLookup.get("a").expand(_cyNetwork);
-////		}
 	}
 	
 	protected boolean anyGroupNodeHasCircularHierarchy() {
@@ -767,26 +714,6 @@ abstract class GEXFParserBase {
 			}
 		}
 		return false;
-	}
-	
-	protected ArrayList<CyNode> getDescendantsOfCyNodeByIdGroup(String pid) {
-		ArrayList<CyNode> result = new ArrayList<CyNode>();
-		if (!_parentIdToChildrenIdLookup.containsKey(pid)) {
-			return null;
-		}
-		ArrayList<String> childIds = _parentIdToChildrenIdLookup.get(pid);
-		for (int i=0; i<childIds.size(); i++) {
-			ArrayList<CyNode> childNodes = getDescendantsOfCyNodeByIdGroup(childIds.get(i));
-			if (_pidToCyGroupLookup.containsKey(childIds.get(i))) {
-				result.add(_pidToCyGroupLookup.get(childIds.get(i)).getGroupNode());
-			} else {
-				result.add(_cyNetwork.getNode(_idMapping.get(childIds.get(i))));
-			}
-			if (childNodes != null) {
-				result.addAll(childNodes);
-			}
-		}
-		return result;
 	}
 	
 	protected ArrayList<CyNode> getImmediateDescendantsOfCyNodeByIdGroup(String pid) {
