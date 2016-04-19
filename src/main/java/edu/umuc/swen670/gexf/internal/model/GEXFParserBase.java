@@ -9,6 +9,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.HashSet;
 
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -649,7 +650,11 @@ abstract class GEXFParserBase {
 		return result;
 	}
 	
-	protected void CreateGroups() {
+	protected void CreateGroups() throws IllegalStateException {
+		if (anyGroupNodeHasCircularHierarchy()) {
+			throw new IllegalStateException("Unable to create graph. Node hierarchy in the file is circular.");
+		}
+		
 		Enumeration<String> pidEnumeration = _parentIdToChildrenIdLookup.keys();
 //		while(pidEnumeration.hasMoreElements()) {
 //			String pid = pidEnumeration.nextElement();
@@ -730,6 +735,38 @@ abstract class GEXFParserBase {
 ////		if (_pidToCyGroupLookup.containsKey("a")) {
 ////			_pidToCyGroupLookup.get("a").expand(_cyNetwork);
 ////		}
+	}
+	
+	protected boolean anyGroupNodeHasCircularHierarchy() {
+		HashSet<String> checkedPids = new HashSet<String>();
+		Enumeration<String> pidEnumeration = _parentIdToChildrenIdLookup.keys();
+		while(pidEnumeration.hasMoreElements()) {
+			String pid = pidEnumeration.nextElement();
+			if (groupNodeHasCircularHierarchy(pid, _parentIdToChildrenIdLookup.get(pid))) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	protected boolean groupNodeHasCircularHierarchy(String pidOfGroupNodeToCheckFor, ArrayList<String> pidOfNodesToCheck) {
+		if (pidOfNodesToCheck.contains(pidOfGroupNodeToCheckFor)) {
+			return true;
+		}
+		
+		ArrayList<String> listOfNodesWithChildrenToCheck = new ArrayList<String>();
+		for (String pidOfNodeToCheck : pidOfNodesToCheck) {
+			if (_parentIdToChildrenIdLookup.containsKey(pidOfNodeToCheck)) {
+				listOfNodesWithChildrenToCheck.add(pidOfNodeToCheck);
+			}
+		}
+		//boolean result = false;
+		for (String pidOfNodeWithChildren : listOfNodesWithChildrenToCheck) {
+			if (groupNodeHasCircularHierarchy(pidOfGroupNodeToCheckFor, _parentIdToChildrenIdLookup.get(pidOfNodeWithChildren))) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	protected ArrayList<CyNode> getDescendantsOfCyNodeByIdGroup(String pid) {

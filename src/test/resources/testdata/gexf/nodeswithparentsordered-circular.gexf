@@ -2,22 +2,13 @@
 <gexf xmlns="http://www.gexf.net/1.2draft" version="1.2">
 	<graph node="static" defaultedgetype="directed">
 		<nodes>
-			<node id="a" label="Kevin Bacon">
-				<nodes>
-					<node id="b" label="God">
-						<nodes>
-							<node id="c" label="human1"/>
-							<node id="d" label="human2"/>
-						</nodes>
-					</node>
-					<node id="e" label="Me">
-						<nodes>
-							<node id="f" label="frog1"/>
-							<node id="g" label="frog2"/>
-						</nodes>
-					</node>
-				</nodes>
-			</node>
+			<node id="a" label="Kevin Bacon" pid="c" />
+			<node id="b" label="God" pid="a" />
+			<node id="c" label="human1" pid="b" />
+			<node id="d" label="human2" pid="b" />
+			<node id="e" label="Me" pid="a" />
+			<node id="f" label="frog1" pid="e" />
+			<node id="g" label="frog2" pid="e" />
 		</nodes>
 		<edges>
 			<edge id="0" source="b" target="e" />
