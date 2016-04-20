@@ -675,24 +675,27 @@ abstract class GEXFParserBase {
 		while(pidEnumeration.hasMoreElements()) {
 			//Create group node from parent node's non-group node
 			String pid = pidEnumeration.nextElement();
-			CyNode parentNode = _cyNetwork.getNode(_idMapping.get(pid));
-			if (_pidToCyGroupLookup.containsKey(pid)) {
-				parentNode = _pidToCyGroupLookup.get(pid).getGroupNode();
+			if(_idMapping.containsKey(pid)) {
+				
+				CyNode parentNode = _cyNetwork.getNode(_idMapping.get(pid));
+				if (_pidToCyGroupLookup.containsKey(pid)) {
+					parentNode = _pidToCyGroupLookup.get(pid).getGroupNode();
+				}
+				CyGroup newGroup = _cyGroupFactory.createGroup(_cyNetwork, parentNode, getImmediateDescendantsOfCyNodeByIdGroup(pid), null, true);
+				
+				//Add group to Group Manager (not sure why this is needed)
+				_cyGroupManager.addGroup(newGroup);
+				
+				//Apply copyable attributes from parent node's non-group node to its group node
+				final CyRow nonGroupRow = ((CySubNetwork)_cyNetwork).getRootNetwork().getRow(parentNode);//_cyNetwork.getRow(parentNode);
+				final CyRow groupRow = ((CySubNetwork)_cyNetwork).getRootNetwork().getRow(newGroup.getGroupNode(), CyRootNetwork.SHARED_ATTRS);
+				
+				//Update Pid --> CyGroup Lookup Hashtable
+				_pidToCyGroupLookup.put(pid, newGroup);
+				
+				//Remove parent node's non-group node from the network
+				_cyNetwork.removeNodes(new ArrayList<CyNode>(Arrays.asList(parentNode)));
 			}
-			CyGroup newGroup = _cyGroupFactory.createGroup(_cyNetwork, parentNode, getImmediateDescendantsOfCyNodeByIdGroup(pid), null, true);
-			
-			//Add group to Group Manager (not sure why this is needed)
-			_cyGroupManager.addGroup(newGroup);
-			
-			//Apply copyable attributes from parent node's non-group node to its group node
-			final CyRow nonGroupRow = ((CySubNetwork)_cyNetwork).getRootNetwork().getRow(parentNode);//_cyNetwork.getRow(parentNode);
-			final CyRow groupRow = ((CySubNetwork)_cyNetwork).getRootNetwork().getRow(newGroup.getGroupNode(), CyRootNetwork.SHARED_ATTRS);
-			
-			//Update Pid --> CyGroup Lookup Hashtable
-			_pidToCyGroupLookup.put(pid, newGroup);
-			
-			//Remove parent node's non-group node from the network
-			_cyNetwork.removeNodes(new ArrayList<CyNode>(Arrays.asList(parentNode)));
 			
 		}
 	}
