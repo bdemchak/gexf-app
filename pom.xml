@@ -3,17 +3,25 @@
 
 	<properties>
 		<cytoscape.api.version>3.1.0</cytoscape.api.version>
-		<bundle.symbolicName>edu.umuc.swen670.gexf</bundle.symbolicName>
+		<bundle.symbolicName>edu.umuc.swen670.gexfapp</bundle.symbolicName>
 		<bundle.namespace>edu.umuc.swen670.gexf</bundle.namespace>
 		<skipTests>false</skipTests>
 	</properties>
+	
+	<url>https://github.com/jeremy-umuc/gexf-app</url>
+	<scm>
+		<url>https://github.com/jeremy-umuc/gexf-app</url>
+	</scm>
+	<issueManagement>
+		<url>https://github.com/jeremy-umuc/gexf-app/issues</url>
+	</issueManagement>
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>edu.umuc.swen670</groupId>
-	<artifactId>gexf</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<artifactId>gexf-app</artifactId>
+	<version>0.5.0</version>
 
-			<name>${bundle.symbolicName}</name>
+	<name>gexf-app</name>
 	
 	<packaging>bundle</packaging>
 
@@ -298,5 +306,6 @@
             <scope>test</scope>
         </dependency>
 	</dependencies>
-
+	
+	<description>Provides support for reading GEXF files in Cytoscape</description>
 </project>
