@@ -5,13 +5,14 @@
 		<cytoscape.api.version>3.1.0</cytoscape.api.version>
 		<bundle.symbolicName>edu.umuc.swen670.gexfapp</bundle.symbolicName>
 		<bundle.namespace>edu.umuc.swen670.gexf</bundle.namespace>
+		<bundle.name>gexf-app</bundle.name>
 		<skipTests>false</skipTests>
 	</properties>
 	
 	<url>https://github.com/jeremy-umuc/gexf-app</url>
 	<description>Provides support for reading GEXF files in Cytoscape</description>
 	<scm>
-		<url>https://github.com/jeremy-umuc/gexf-app</url>
+		<url>https://github.com/jeremy-umuc/gexf-app.git</url>
 	</scm>
 	<issueManagement>
 		<url>https://github.com/jeremy-umuc/gexf-app/issues</url>
@@ -19,10 +20,10 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>edu.umuc.swen670</groupId>
-	<artifactId>gexf-app</artifactId>
-	<version>0.5.0</version>
+	<artifactId>${bundle.name}</artifactId>
+	<version>0.5.1</version>
 
-	<name>gexf-app</name>
+	<name>${bundle.name}</name>
 	
 	<packaging>bundle</packaging>
 
@@ -85,6 +86,7 @@
 					<instructions>
 						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
 						<Bundle-Version>${project.version}</Bundle-Version>
+						<Bundle-Name>${bundle.name}</Bundle-Name>
 						<Export-Package>${bundle.namespace}</Export-Package>
 						<Private-Package>${bundle.namespace}.internal.*</Private-Package>
 						<Bundle-Activator>${bundle.namespace}.internal.CyActivator</Bundle-Activator>
