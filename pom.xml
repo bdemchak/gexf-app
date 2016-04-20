@@ -9,6 +9,7 @@
 	</properties>
 	
 	<url>https://github.com/jeremy-umuc/gexf-app</url>
+	<description>Provides support for reading GEXF files in Cytoscape</description>
 	<scm>
 		<url>https://github.com/jeremy-umuc/gexf-app</url>
 	</scm>
@@ -307,5 +308,4 @@
         </dependency>
 	</dependencies>
 	
-	<description>Provides support for reading GEXF files in Cytoscape</description>
 </project>
