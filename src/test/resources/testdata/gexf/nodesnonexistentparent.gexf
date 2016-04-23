@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gexf xmlns="http://www.gexf.net/1.2draft" version="1.2">
+	<graph node="static" defaultedgetype="directed">
+		<nodes>
+			<node id="1" label="frog2" pid="0" />
+			<node id="2" label="Kevin Bacon" pid="1" />
+			<node id="3" label="human1" pid="1" />
+		</nodes>
+		<edges>
+			<edge id="0" source="2" target="3" />
+		</edges>
+	</graph>
+</gexf>
