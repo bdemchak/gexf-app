@@ -672,7 +672,7 @@ abstract class GEXFParserBase {
 //				
 		_pidToCyGroupLookup = new Hashtable<String, CyGroup>();
 		
-		while(pidEnumeration.hasMoreElements()) {
+		while (pidEnumeration.hasMoreElements()) {
 			//Create group node from parent node's non-group node
 			String pid = pidEnumeration.nextElement();
 			CyNode parentNode = _cyNetwork.getNode(_idMapping.get(pid));
@@ -685,16 +685,40 @@ abstract class GEXFParserBase {
 			_cyGroupManager.addGroup(newGroup);
 			
 			//Apply copyable attributes from parent node's non-group node to its group node
-			final CyRow nonGroupRow = ((CySubNetwork)_cyNetwork).getRootNetwork().getRow(parentNode);//_cyNetwork.getRow(parentNode);
-			final CyRow groupRow = ((CySubNetwork)_cyNetwork).getRootNetwork().getRow(newGroup.getGroupNode(), CyRootNetwork.SHARED_ATTRS);
+			//final CyRow nonGroupRow = ((CySubNetwork)_cyNetwork).getRootNetwork().getRow(parentNode);//_cyNetwork.getRow(parentNode);
+			//final CyRow groupRow = ((CySubNetwork)_cyNetwork).getRootNetwork().getRow(newGroup.getGroupNode(), CyRootNetwork.SHARED_ATTRS);
 			
 			//Update Pid --> CyGroup Lookup Hashtable
 			_pidToCyGroupLookup.put(pid, newGroup);
-			
 			//Remove parent node's non-group node from the network
 			_cyNetwork.removeNodes(new ArrayList<CyNode>(Arrays.asList(parentNode)));
 			
 		}
+		
+//		Enumeration<String> groupPidEnumeration = _pidToCyGroupLookup.keys();
+//		while (groupPidEnumeration.hasMoreElements()) {
+//			String groupPid = groupPidEnumeration.nextElement();
+//			
+//			CyGroup group = _pidToCyGroupLookup.get(groupPid);
+//			if (!group.isCollapsed(_cyNetwork)) {
+//				group.collapse(_cyNetwork);
+//				group.
+//			}
+//		}
+//		
+//		groupPidEnumeration = _pidToCyGroupLookup.keys();
+//		while (groupPidEnumeration.hasMoreElements()) {
+//			String groupPid = groupPidEnumeration.nextElement();
+//			
+//			CyGroup group = _pidToCyGroupLookup.get(groupPid);
+//			boolean temp = group.isCollapsed(_cyNetwork);
+//			if (group.isCollapsed(_cyNetwork)) {
+//				group.expand(_cyNetwork);
+//				temp = group.isCollapsed(_cyNetwork);
+//				int i = 0;
+//				i++;
+//			}
+//		}
 	}
 	
 	protected boolean anyGroupNodeHasCircularHierarchy() {
