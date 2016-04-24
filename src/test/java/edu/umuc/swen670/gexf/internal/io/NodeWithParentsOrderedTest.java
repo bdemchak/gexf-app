@@ -16,7 +16,7 @@ import org.junit.Test;
 public class NodeWithParentsOrderedTest extends TestBase {
 
 	@Test
-	public void ParseEdgeTypeDirectedFile() throws Exception {
+	public void ParseNodesWithParentsOrderedFile() throws Exception {
 		InputStream stream = this.getClass().getClassLoader().getResourceAsStream("testData/gexf/nodeswithparentsordered.gexf");
 		assertNotNull(stream);
 		
@@ -29,8 +29,8 @@ public class NodeWithParentsOrderedTest extends TestBase {
 		
 		
 		//check the counts
-		//assertEquals(7, cyNetwork.getNodeCount());
-		//assertEquals(4, cyNetwork.getEdgeCount());
+		assertEquals(4, cyNetwork.getNodeCount());
+		assertEquals(1, cyNetwork.getEdgeCount());
 		
 		
 		

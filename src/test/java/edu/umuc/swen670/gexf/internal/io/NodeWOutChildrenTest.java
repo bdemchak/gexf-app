@@ -15,7 +15,7 @@ import org.junit.Test;
 public class NodeWOutChildrenTest extends TestBase {
 
 	@Test
-	public void ParseEdgeTypeDirectedFile() throws Exception {
+	public void ParseNodeWOutChildrenFile() throws Exception {
 		InputStream stream = this.getClass().getClassLoader().getResourceAsStream("testData/gexf/nodewoutchildren.gexf");
 		assertNotNull(stream);
 		
