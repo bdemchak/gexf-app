@@ -21,7 +21,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>edu.umuc.swen670</groupId>
 	<artifactId>${bundle.name}</artifactId>
-	<version>0.5.1</version>
+	<version>0.8.0</version>
 
 	<name>${bundle.name}</name>
 	
