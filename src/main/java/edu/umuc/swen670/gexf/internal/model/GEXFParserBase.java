@@ -273,14 +273,16 @@ abstract class GEXFParserBase {
 					ArrayList<String> nodesToAddToGroup = ParseNodes(cyNode);
 					_parentIdToChildrenIdLookup.put(cyNodeId, nodesToAddToGroup);
 				}
-				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFNode.PARENT)) {
-					String xParent = _xmlReader.getAttributeValue(null, GEXFNode.FOR).trim();
+				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFNode.PARENTS)) {
+					ArrayList<String> idsOfParentNodes = ParseParents();
 					
-					if(!_parentIdToChildrenIdLookup.containsKey(xParent)) {
-						_parentIdToChildrenIdLookup.put(xParent, new ArrayList<String>());
+					for(String parentId : idsOfParentNodes) {
+						if(!_parentIdToChildrenIdLookup.containsKey(parentId)) {
+							_parentIdToChildrenIdLookup.put(parentId, new ArrayList<String>());
+						}
+						
+						_parentIdToChildrenIdLookup.get(parentId).add(cyNodeId);
 					}
-					
-					_parentIdToChildrenIdLookup.get(xParent).add(cyNodeId);
 				}
 				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFEdge.EDGES)) {
 					ParseEdges();
@@ -346,31 +348,6 @@ abstract class GEXFParserBase {
 			switch(event) {
 			case XMLStreamConstants.END_ELEMENT :
 				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFEdge.EDGES)) {
-//					Enumeration<String> pidEnumeration = _parentIdToChildrenIdLookup.keys();
-//					while(pidEnumeration.hasMoreElements()) {
-//						String pid = pidEnumeration.nextElement();
-//						CyNode parentNode = _cyNetwork.getNode(_idMapping.get(pid));
-//						
-//						ArrayList<CyNode> allDescendantsOfNode = getImmediateDescendantsOfCyNodeById(pid);
-//						//ArrayList<CyNode> allDescendantsOfNode = getDescendantsOfCyNodeById(pid);
-//						
-//						ArrayList<CyEdge> sourceEdgeList = _sourceNodeIdToEdgeLookup.get(pid);
-//						ArrayList<CyEdge> edgesInGroupList = new ArrayList<CyEdge>();
-//
-//						if (sourceEdgeList != null) {
-//							for(int i=0; i<sourceEdgeList.size(); i++) {
-//								CyEdge edge = sourceEdgeList.get(i);
-//								CyNode targetNode = edge.getTarget();
-//								if (allDescendantsOfNode.contains(targetNode)) {
-//									edgesInGroupList.add(edge);
-//								}
-//							}
-//						}
-//						
-//						CyGroup newGroup = _cyGroupFactory.createGroup(_cyNetwork, parentNode, allDescendantsOfNode, null, true);
-//						//CyGroup newGroup = _cyGroupFactory.createGroup(_cyNetwork, parentNode, allDescendantsOfNode, edgesInGroupList, true);
-//						_cyGroupManager.addGroup(newGroup);
-//					}
 					
 					return;
 				}
@@ -506,6 +483,30 @@ abstract class GEXFParserBase {
 		
 		
 		throw new InvalidClassException("Missing Attribute Value tags");
+	}
+	
+	protected ArrayList<String> ParseParents() throws InvalidClassException, XMLStreamException {
+		ArrayList<String> result = new ArrayList<String>();
+		
+		while(_xmlReader.hasNext()) {
+			int event = _xmlReader.next();
+
+			switch(event) {
+			case XMLStreamConstants.END_ELEMENT :
+				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFNode.PARENTS)) {
+					return result;
+				}
+				break;
+			case XMLStreamConstants.START_ELEMENT :
+				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFNode.PARENT)) {
+					String xParent = _xmlReader.getAttributeValue(null, GEXFNode.FOR).trim();
+					result.add(xParent);
+				}
+				break;
+			}
+		}
+				
+		throw new InvalidClassException("Missing Parents tag");
 	}
 	
 	@SuppressWarnings("unchecked")
