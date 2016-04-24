@@ -273,6 +273,15 @@ abstract class GEXFParserBase {
 					ArrayList<String> nodesToAddToGroup = ParseNodes(cyNode);
 					_parentIdToChildrenIdLookup.put(cyNodeId, nodesToAddToGroup);
 				}
+				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFNode.PARENT)) {
+					String xParent = _xmlReader.getAttributeValue(null, GEXFNode.FOR).trim();
+					
+					if(!_parentIdToChildrenIdLookup.containsKey(xParent)) {
+						_parentIdToChildrenIdLookup.put(xParent, new ArrayList<String>());
+					}
+					
+					_parentIdToChildrenIdLookup.get(xParent).add(cyNodeId);
+				}
 				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFEdge.EDGES)) {
 					ParseEdges();
 				}

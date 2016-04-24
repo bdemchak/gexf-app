@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gexf xmlns="http://www.gexf.net/1.2draft" version="1.2">
+  <graph>
+    <nodes>
+      <node id="1" label="lemon" />
+      <node id="2" label="meringue" />
+      <node id="3" label="pie">
+        <parents>
+          <parent for="1" />
+          <parent for="2" />
+        </parents>
+      </node>
+    </nodes>
+  </graph>
+</gexf>
