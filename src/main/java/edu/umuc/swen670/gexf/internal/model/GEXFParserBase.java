@@ -4,9 +4,12 @@ import java.awt.Color;
 import java.io.IOException;
 import java.io.InvalidClassException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
+import java.util.HashSet;
 
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -15,12 +18,16 @@ import javax.xml.stream.XMLStreamReader;
 import org.cytoscape.group.CyGroup;
 import org.cytoscape.group.CyGroupFactory;
 import org.cytoscape.group.CyGroupManager;
+import org.cytoscape.group.CyGroupSettingsManager;
+import org.cytoscape.group.CyGroupSettingsManager.GroupViewType;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
+import org.cytoscape.model.subnetwork.CyRootNetwork;
+import org.cytoscape.model.subnetwork.CySubNetwork;
 import org.cytoscape.view.presentation.property.LineTypeVisualProperty;
 import org.cytoscape.view.presentation.property.NodeShapeVisualProperty;
 
@@ -32,20 +39,22 @@ abstract class GEXFParserBase {
 	protected String _defaultEdgeType = "";
 	protected CyGroupFactory _cyGroupFactory = null;
 	protected CyGroupManager _cyGroupManager = null;
+	protected CyGroupSettingsManager _cyGroupSettingsManager = null;
 	
 	protected Hashtable<String, Long> _idMapping = new Hashtable<String, Long>();
 	protected Hashtable<String, ArrayList<String>> _parentIdToChildrenIdLookup = new Hashtable<String, ArrayList<String>>();
-	protected Hashtable<String, ArrayList<CyEdge>> _sourceNodeIdToEdgeLookup = new Hashtable<String, ArrayList<CyEdge>>();
-	protected Hashtable<String, ArrayList<CyEdge>> _targetNodeIdToEdgeLookup = new Hashtable<String, ArrayList<CyEdge>>();
+	protected Hashtable<String, CyGroup> _pidToCyGroupLookup = new Hashtable<String, CyGroup>();
 	protected AttributeMapping _attNodeMapping = null;
 	protected AttributeMapping _attEdgeMapping = null;
 
-	public GEXFParserBase(XMLStreamReader xmlReader, CyNetwork cyNetwork, String version, CyGroupFactory cyGroupFactory, CyGroupManager cyGroupManager) {
+	public GEXFParserBase(XMLStreamReader xmlReader, CyNetwork cyNetwork, String version,
+			CyGroupFactory cyGroupFactory, CyGroupManager cyGroupManager, CyGroupSettingsManager cyGroupSettingsManager) {
 		_xmlReader = xmlReader;
 		_cyNetwork = cyNetwork;
 		_version = version;
 		_cyGroupFactory = cyGroupFactory;
 		_cyGroupManager = cyGroupManager;
+		_cyGroupSettingsManager = cyGroupSettingsManager;
 	}
 	
 	public abstract void ParseStream() throws IOException, XMLStreamException;
@@ -258,6 +267,7 @@ abstract class GEXFParserBase {
 					}					
 					
 					_cyNetwork.getRow(cyNode).set(CyNetwork.NAME, xLabel);
+					_cyNetwork.getRow(cyNode).set("shared name", xLabel);
 				}
 				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFNode.NODES)) { 
 					ArrayList<String> nodesToAddToGroup = ParseNodes(cyNode);
@@ -404,32 +414,6 @@ abstract class GEXFParserBase {
 						CyRow targetRow = _cyNetwork.getRow(_cyNetwork.getNode(_idMapping.get(xTarget)));
 						String targetColor = targetRow.get(GEXFViz.ATT_COLOR, String.class);
 						if(targetColor!=null) { _cyNetwork.getRow(cyEdgeReverse).set(GEXFViz.ATT_COLOR, targetColor); }
-					}
-					
-					if (!_sourceNodeIdToEdgeLookup.containsKey(xSource)) {
-						_sourceNodeIdToEdgeLookup.put(xSource, new ArrayList<CyEdge>());
-					}
-					ArrayList<CyEdge> tempEdgeList = _sourceNodeIdToEdgeLookup.get(xSource);
-					tempEdgeList.add(cyEdge);
-					
-					if (!_targetNodeIdToEdgeLookup.containsKey(xTarget)) {
-						_targetNodeIdToEdgeLookup.put(xTarget, new ArrayList<CyEdge>());
-					}
-					tempEdgeList = _targetNodeIdToEdgeLookup.get(xTarget);
-					tempEdgeList.add(cyEdge);
-					
-					if (cyEdgeReverse != null) {
-						if (!_targetNodeIdToEdgeLookup.containsKey(xSource)) {
-							_targetNodeIdToEdgeLookup.put(xSource, new ArrayList<CyEdge>());
-						}
-						tempEdgeList = _targetNodeIdToEdgeLookup.get(xSource);
-						tempEdgeList.add(cyEdgeReverse);
-						
-						if (!_sourceNodeIdToEdgeLookup.containsKey(xTarget)) {
-							_sourceNodeIdToEdgeLookup.put(xTarget, new ArrayList<CyEdge>());
-						}
-						tempEdgeList = _sourceNodeIdToEdgeLookup.get(xTarget);
-						tempEdgeList.add(cyEdgeReverse);
 					}
 				}
 				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFAttribute.ATTVALUES)) {
@@ -633,22 +617,86 @@ abstract class GEXFParserBase {
 		}
 	}
 	
-	protected ArrayList<CyNode> getDescendantsOfCyNodeById(String pid) {
-		ArrayList<CyNode> result = new ArrayList<CyNode>();
-		if (!_parentIdToChildrenIdLookup.containsKey(pid)) {
-			return null;
+//	protected ArrayList<CyNode> getDescendantsOfCyNodeById(String pid) {
+//		ArrayList<CyNode> result = new ArrayList<CyNode>();
+//		if (!_parentIdToChildrenIdLookup.containsKey(pid)) {
+//			return null;
+//		}
+//		ArrayList<String> childIds = _parentIdToChildrenIdLookup.get(pid);
+//		for (int i=0; i<childIds.size(); i++) {
+//			ArrayList<CyNode> childNodes = getDescendantsOfCyNodeById(childIds.get(i));
+//			if (childNodes != null) {
+//				result.add(_cyNetwork.getNode(_idMapping.get(childIds.get(i))));
+//				result.addAll(childNodes);
+//			} else {
+//				result.add(_cyNetwork.getNode(_idMapping.get(childIds.get(i))));
+//			}
+//		}
+//		return result;
+//	}
+	
+	protected void CreateGroups() throws IllegalStateException {
+		if (anyGroupNodeHasCircularHierarchy()) {
+			throw new IllegalStateException("Unable to create graph. Node hierarchy in the file is circular.");
 		}
-		ArrayList<String> childIds = _parentIdToChildrenIdLookup.get(pid);
-		for (int i=0; i<childIds.size(); i++) {
-			ArrayList<CyNode> childNodes = getDescendantsOfCyNodeById(childIds.get(i));
-			if (childNodes != null) {
-				result.add(_cyNetwork.getNode(_idMapping.get(childIds.get(i))));
-				result.addAll(childNodes);
-			} else {
-				result.add(_cyNetwork.getNode(_idMapping.get(childIds.get(i))));
+		
+		Enumeration<String> pidEnumeration = _parentIdToChildrenIdLookup.keys();
+		
+		_pidToCyGroupLookup = new Hashtable<String, CyGroup>();
+		
+		while (pidEnumeration.hasMoreElements()) {
+			//Create group node from parent node's non-group node
+			String pid = pidEnumeration.nextElement();
+			if(_idMapping.containsKey(pid)) {
+				
+				CyNode parentNode = _cyNetwork.getNode(_idMapping.get(pid));
+				if (_pidToCyGroupLookup.containsKey(pid)) {
+					parentNode = _pidToCyGroupLookup.get(pid).getGroupNode();
+				}
+				CyGroup newGroup = _cyGroupFactory.createGroup(_cyNetwork, parentNode, getImmediateDescendantsOfCyNodeById(pid), null, true);
+				
+				//Add group to Group Manager (not sure why this is needed)
+				_cyGroupManager.addGroup(newGroup);
+				
+				//Update Pid --> CyGroup Lookup Hashtable
+				_pidToCyGroupLookup.put(pid, newGroup);
+				
+				//Remove parent node's non-group node from the network
+				_cyNetwork.removeNodes(new ArrayList<CyNode>(Arrays.asList(parentNode)));
+			}			
+		}
+	}
+	
+	protected boolean anyGroupNodeHasCircularHierarchy() {
+		HashSet<String> checkedPids = new HashSet<String>();
+		Enumeration<String> pidEnumeration = _parentIdToChildrenIdLookup.keys();
+		while(pidEnumeration.hasMoreElements()) {
+			String pid = pidEnumeration.nextElement();
+			if (groupNodeHasCircularHierarchy(pid, _parentIdToChildrenIdLookup.get(pid))) {
+				return true;
 			}
 		}
-		return result;
+		return false;
+	}
+	
+	protected boolean groupNodeHasCircularHierarchy(String pidOfGroupNodeToCheckFor, ArrayList<String> idOfNodesToCheck) {
+		if (idOfNodesToCheck.contains(pidOfGroupNodeToCheckFor)) {
+			return true;
+		}
+		
+		ArrayList<String> listOfNodesWithChildrenToCheck = new ArrayList<String>();
+		for (String idOfNodeToCheck : idOfNodesToCheck) {
+			if (_parentIdToChildrenIdLookup.containsKey(idOfNodeToCheck)) {
+				listOfNodesWithChildrenToCheck.add(idOfNodeToCheck);
+			}
+		}
+
+		for (String idOfNodeWithChildren : listOfNodesWithChildrenToCheck) {
+			if (groupNodeHasCircularHierarchy(pidOfGroupNodeToCheckFor, _parentIdToChildrenIdLookup.get(idOfNodeWithChildren))) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	protected ArrayList<CyNode> getImmediateDescendantsOfCyNodeById(String pid) {
@@ -658,39 +706,13 @@ abstract class GEXFParserBase {
 		}
 		ArrayList<String> childIds = _parentIdToChildrenIdLookup.get(pid);
 		for (int i=0; i<childIds.size(); i++) {
-			result.add(_cyNetwork.getNode(_idMapping.get(childIds.get(i))));
+			if (_pidToCyGroupLookup.containsKey(childIds.get(i))) {
+				result.add(_pidToCyGroupLookup.get(childIds.get(i)).getGroupNode());
+			} else {
+				result.add(_cyNetwork.getNode(_idMapping.get(childIds.get(i))));
+			}
 		}
 		return result;
-	}
-	
-	protected void CreateGroups() {
-		/*
-		Enumeration<String> pidEnumeration = _parentIdToChildrenIdLookup.keys();
-		while(pidEnumeration.hasMoreElements()) {
-			String pid = pidEnumeration.nextElement();
-			CyNode parentNode = _cyNetwork.getNode(_idMapping.get(pid));
-			
-			ArrayList<CyNode> allDescendantsOfNode = getImmediateDescendantsOfCyNodeById(pid);
-			//ArrayList<CyNode> allDescendantsOfNode = getDescendantsOfCyNodeById(pid);
-			
-			ArrayList<CyEdge> sourceEdgeList = _sourceNodeIdToEdgeLookup.get(pid);
-			ArrayList<CyEdge> edgesInGroupList = new ArrayList<CyEdge>();
-
-			if (sourceEdgeList != null) {
-				for(int i=0; i<sourceEdgeList.size(); i++) {
-					CyEdge edge = sourceEdgeList.get(i);
-					CyNode targetNode = edge.getTarget();
-					if (allDescendantsOfNode.contains(targetNode)) {
-						edgesInGroupList.add(edge);
-					}
-				}
-			}
-			
-			CyGroup newGroup = _cyGroupFactory.createGroup(_cyNetwork, parentNode, allDescendantsOfNode, null, true);
-			//CyGroup newGroup = _cyGroupFactory.createGroup(_cyNetwork, parentNode, allDescendantsOfNode, edgesInGroupList, true);
-			_cyGroupManager.addGroup(newGroup);
-		}
-		*/
 	}
 	
 	protected abstract Boolean IsDirected(String direction);

@@ -12,6 +12,7 @@ import org.cytoscape.ding.NetworkViewTestSupport;
 import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.group.CyGroupFactory;
 import org.cytoscape.group.CyGroupManager;
+import org.cytoscape.group.CyGroupSettingsManager;
 import org.cytoscape.group.GroupTestSupport;
 import org.cytoscape.io.read.CyNetworkReader;
 import org.cytoscape.model.CyEdge;
@@ -39,12 +40,14 @@ public class TestBase {
 		CyEventHelper cyEventHelper = mock(CyEventHelper.class);
 		CyGroupFactory cyGroupFactory = new GroupTestSupport().getGroupFactory();
 		CyGroupManager cyGroupManager = new GroupTestSupport().getGroupManager();
+		CyGroupSettingsManager cyGroupSettingsManager = mock(CyGroupSettingsManager.class);
+		
 		VisualMappingFunctionFactory passthroughMapper = mock(VisualMappingFunctionFactory.class);
 		VisualMappingManager visualMappingManager = mock(VisualMappingManager.class);
 		
 		CyNetworkReader reader = new GEXFNetworkReader(stream, cyNetworkViewFactory, cyNetworkFactory, cyNetworkManager, 
 													   cyRootNetworkManager, cyEventHelper, cyGroupFactory, cyGroupManager, 
-													   passthroughMapper, visualMappingManager);
+													   cyGroupSettingsManager, passthroughMapper, visualMappingManager);
 		
 		TaskMonitor monitor = mock(TaskMonitor.class);
 		
