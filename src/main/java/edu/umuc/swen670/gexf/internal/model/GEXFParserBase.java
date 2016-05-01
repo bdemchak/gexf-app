@@ -627,24 +627,6 @@ abstract class GEXFParserBase {
 		}
 	}
 	
-//	protected ArrayList<CyNode> getDescendantsOfCyNodeById(String pid) {
-//		ArrayList<CyNode> result = new ArrayList<CyNode>();
-//		if (!_parentIdToChildrenIdLookup.containsKey(pid)) {
-//			return null;
-//		}
-//		ArrayList<String> childIds = _parentIdToChildrenIdLookup.get(pid);
-//		for (int i=0; i<childIds.size(); i++) {
-//			ArrayList<CyNode> childNodes = getDescendantsOfCyNodeById(childIds.get(i));
-//			if (childNodes != null) {
-//				result.add(_cyNetwork.getNode(_idMapping.get(childIds.get(i))));
-//				result.addAll(childNodes);
-//			} else {
-//				result.add(_cyNetwork.getNode(_idMapping.get(childIds.get(i))));
-//			}
-//		}
-//		return result;
-//	}
-	
 	protected void CreateGroups() throws IllegalStateException {
 		if (anyGroupNodeHasCircularHierarchy()) {
 			throw new IllegalStateException("Unable to create graph. Node hierarchy in the file is circular.");
