@@ -1,8 +1,8 @@
 package edu.umuc.swen670.gexf.internal.model;
 
-import java.util.Hashtable;
+import java.util.HashMap;
 
 public class AttributeMapping {
-	public final Hashtable<String, String> Id = new Hashtable<String, String>();
-	public final Hashtable<String, String> Type = new Hashtable<String, String>();
+	public final HashMap<String, String> Id = new HashMap<String, String>();
+	public final HashMap<String, String> Type = new HashMap<String, String>();
 }

@@ -5,11 +5,8 @@ import java.io.IOException;
 import java.io.InvalidClassException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.HashSet;
 
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -41,9 +38,9 @@ abstract class GEXFParserBase {
 	protected CyGroupManager _cyGroupManager = null;
 	protected CyGroupSettingsManager _cyGroupSettingsManager = null;
 	
-	protected Hashtable<String, Long> _idMapping = new Hashtable<String, Long>();
-	protected Hashtable<String, ArrayList<String>> _parentIdToChildrenIdLookup = new Hashtable<String, ArrayList<String>>();
-	protected Hashtable<String, CyGroup> _pidToCyGroupLookup = new Hashtable<String, CyGroup>();
+	protected HashMap<String, Long> _idMapping = new HashMap<String, Long>();
+	protected HashMap<String, ArrayList<String>> _parentIdToChildrenIdLookup = new HashMap<String, ArrayList<String>>();
+	protected HashMap<String, CyGroup> _pidToCyGroupLookup = null;
 	protected AttributeMapping _attNodeMapping = null;
 	protected AttributeMapping _attEdgeMapping = null;
 
@@ -631,14 +628,10 @@ abstract class GEXFParserBase {
 		if (anyGroupNodeHasCircularHierarchy()) {
 			throw new IllegalStateException("Unable to create graph. Node hierarchy in the file is circular.");
 		}
+		_pidToCyGroupLookup = new HashMap<String, CyGroup>();
 		
-		Enumeration<String> pidEnumeration = _parentIdToChildrenIdLookup.keys();
-		
-		_pidToCyGroupLookup = new Hashtable<String, CyGroup>();
-		
-		while (pidEnumeration.hasMoreElements()) {
+		for(String pid : _parentIdToChildrenIdLookup.keySet()) {
 			//Create group node from parent node's non-group node
-			String pid = pidEnumeration.nextElement();
 			if(_idMapping.containsKey(pid)) {
 				
 				CyNode parentNode = _cyNetwork.getNode(_idMapping.get(pid));
@@ -650,7 +643,7 @@ abstract class GEXFParserBase {
 				//Add group to Group Manager (not sure why this is needed)
 				_cyGroupManager.addGroup(newGroup);
 				
-				//Update Pid --> CyGroup Lookup Hashtable
+				//Update Pid --> CyGroup Lookup HashMap
 				_pidToCyGroupLookup.put(pid, newGroup);
 				
 				//Remove parent node's non-group node from the network
@@ -660,10 +653,7 @@ abstract class GEXFParserBase {
 	}
 	
 	protected boolean anyGroupNodeHasCircularHierarchy() {
-		HashSet<String> checkedPids = new HashSet<String>();
-		Enumeration<String> pidEnumeration = _parentIdToChildrenIdLookup.keys();
-		while(pidEnumeration.hasMoreElements()) {
-			String pid = pidEnumeration.nextElement();
+		for(String pid : _parentIdToChildrenIdLookup.keySet()) {
 			if (groupNodeHasCircularHierarchy(pid, _parentIdToChildrenIdLookup.get(pid))) {
 				return true;
 			}
