@@ -54,7 +54,61 @@ abstract class GEXFParserBase {
 		_cyGroupSettingsManager = cyGroupSettingsManager;
 	}
 	
-	public abstract void ParseStream() throws IOException, XMLStreamException;
+	public void ParseStream() throws IOException, XMLStreamException {
+
+		String mode = "";
+		
+		_cyNetwork.getDefaultEdgeTable().createColumn(GEXFEdge.EDGETYPE, String.class, true);
+		_cyNetwork.getDefaultEdgeTable().createColumn(GEXFEdge.WEIGHT, Double.class, true);
+		
+		SetupVisualMapping();
+		_cyGroupSettingsManager.setGroupViewType(GroupViewType.SHOWGROUPNODE);
+		
+		while(_xmlReader.hasNext()) {
+			int event = _xmlReader.next();
+
+			switch(event) {
+			case XMLStreamConstants.END_ELEMENT :
+				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFGraph.GRAPH)) {
+					CreateGroups();
+					
+					return;
+				}
+			case XMLStreamConstants.START_ELEMENT :
+				if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFMeta.META)) {
+					ParseMeta();
+					break;
+				}
+				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFGraph.GRAPH)) {
+					List<String> graphAttributes = GetElementAttributes();
+					
+					_defaultEdgeType = graphAttributes.contains(GEXFGraph.DEFAULTEDGETYPE) ? _xmlReader.getAttributeValue(null, GEXFGraph.DEFAULTEDGETYPE).trim() : DefaultEdgeDirection();
+					mode = graphAttributes.contains(GEXFGraph.MODE) ? _xmlReader.getAttributeValue(null, GEXFGraph.MODE).trim() : GEXFGraph.STATIC;
+					if(mode.equalsIgnoreCase(GEXFGraph.DYNAMIC)) {throw new InvalidClassException("Dynamic graphs are not supported.");}
+				}
+				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFAttribute.ATTRIBUTES)) {
+					String attributeClass = _xmlReader.getAttributeValue(null, GEXFAttribute.CLASS).trim();
+					if(attributeClass.equalsIgnoreCase(GEXFAttribute.NODE)) {
+						_attNodeMapping = ParseAttributeHeader(GEXFAttribute.NODE);
+					}
+					else if (attributeClass.equalsIgnoreCase(GEXFAttribute.EDGE)) {
+						_attEdgeMapping = ParseAttributeHeader(GEXFAttribute.EDGE);
+					}
+					else {
+						throw new InvalidClassException(attributeClass);
+					}
+				}
+				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFNode.NODES)) {
+					ParseNodes(null);
+				}
+				else if(_xmlReader.getLocalName().equalsIgnoreCase(GEXFEdge.EDGES)) {
+					ParseEdges();
+				}
+			}
+		}
+		
+		throw new InvalidClassException("Missing Graph tags");
+	}
 	
 	protected void SetupVisualMapping() {
 		//nodes
@@ -700,6 +754,8 @@ abstract class GEXFParserBase {
 	protected abstract Boolean IsDirected(String direction);
 	
 	protected abstract Boolean IsBiDirectional(String direction);
+	
+	protected abstract String DefaultEdgeDirection();
 	
 	private String ConvertColorToHex(Color color) {
 		String hexColor = Integer.toHexString(color.getRGB() & 0xffffff);
